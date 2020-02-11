@@ -11,22 +11,29 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Harvest Data
 Data set for Commercial Harvest from 1997 to 2019 of Iowa Lakes
-First we will correct the data set by fixing the date(as date), Year(as function), Pounds(as integer) as well as, creating subsets for each lake
+First we will correct the data set by correcting the date and year columns as well as removing blank cells and renaming cells
 
 ```{r}
-harvestdata$Date <- as.Date(harvestdata$Date, "m%/d%/Y%")
-harvestdata$Year <- as.factor(harvestdata$Year)
-harvestdata$Pounds <- as.integer(harvestdata$Pounds)
+harvest.dat <- read.csv("harvestdata.csv", TRUE)
+harvest.dat$Date <- as.Date(harvest.dat$Date, "m%/d%/Y%")
+harvest.dat$Year <- as.factor(harvest.dat$Year)
 
+colnames(harvest.dat)[1] <- c("Lake")
 
+harvest.dat<-droplevels(subset(harvest.dat, Lake != ""))
+harvest.dat$Lake[harvest.dat$Lake == "center lake"] <- "Center Lake"
+harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
 
+levels(harvest.dat$Lake)
+```
 
-center.sub <- subset(harvestdata, harvestdata$ï..Lake == "Center Lake" )
-fiveisland.sub <- subset(harvestdata, harvestdata$ï..Lake == "Five Island Lake")
-silver.sub <- subset(harvestdata, harvestdata$ï..Lake == "Silver Lake (Dickinson)")
-high.sub <- subset(harvestdata, harvestdata$ï..Lake == "High Lake")
-ingham.sub <- subset(harvestdata, harvestdata$ï..Lake == "Ingham Lake")
-lostisland.sub <- subset(harvestdata, harvestdata$ï..Lake == "Lost Island Lake")
+```{r}
+center.sub <- subset(harvest.dat, harvest.dat$Lake == "Center Lake")
+fiveisland.sub <- subset(harvest.dat, harvest.dat$Lake == "Five Island Lake")
+silver.sub <- subset(harvest.dat, harvest.dat$Lake == "Silver Lake")
+high.sub <- subset(harvest.dat, harvest.dat$Lake == "High Lake")
+ingham.sub <- subset(harvest.dat, harvest.dat$Lake == "Ingham Lake")
+lostisland.sub <- subset(harvest.dat, harvest.dat$Lake == "Lost Island Lake")
 
 ```
 
@@ -47,4 +54,51 @@ summary(lostisland.sub)
 plotting data for center lake
 ```{r Center Lake Plots}
 plot(center.sub$Date, center.sub$Pounds)
+```
+
+
+
+# Water Quality Data
+
+Same thing as harvest data but with water quality
+
+```{r}
+water.dat <- read.csv("waterdata.csv", TRUE)
+
+#removing the not-needed columns & renaming the needed columns
+
+water.dat <- water.dat[,-c(1,5,8,9,13,20,21)]
+colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops")
+
+#Renaming Each Lake
+
+water.dat$Date <- as.Date(water.dat$Date, "%m/%d/%Y")
+water.dat<-droplevels(subset(water.dat, Lake != ""))
+water.dat$Lake <- as.character(water.dat$Lake)
+water.dat$Lake[water.dat$Lake == "(019) Center Lake (Dickinson ) "] <- "Center Lake"
+water.dat$Lake[water.dat$Lake == "(036) Five Island Lake (Palo Alto ) "] <- "Five Island Lake"
+water.dat$Lake[water.dat$Lake == "(048) Ingham Lake (Emmet ) "] <- "Ingham Lake"
+water.dat$Lake[water.dat$Lake == "(077) Lost Island Lake (Palo Alto ) "] <- "Lost Island Lake"
+water.dat$Lake[water.dat$Lake == "(105) Silver Lake (Dickinson) (Dickinson ) "] <- "Silver Lake"
+water.dat$Lake <- as.factor(water.dat$Lake)
+levels(water.dat$Lake)
+
+```
+
+Subsetting each Lake in the Water Quality data set
+
+```{r}
+
+center.wq <- subset(water.dat, water.dat$Lake == "Center Lake")
+fiveisland.wq <- subset(water.dat, water.dat$Lake == "Five Island Lake")
+ingham.wq <- subset(water.dat, water.dat$Lake == "Ingham Lake")
+lostisland.wq <- subset(water.dat, water.dat$Lake == "Lost Island Lake")
+silver.wq <- subset(water.dat, water.dat$Lake == "Silver Lake")
+
+```
+
+```{r}
+plot(fiveisland.wq$Date, fiveisland.wq$`Chlorophyll a`)
+plot(center.wq$Date, center.wq$Zoops)
+
 ```
