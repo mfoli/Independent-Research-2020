@@ -14,7 +14,6 @@ Data set for Commercial Harvest from 1997 to 2019 of Iowa Lakes
 First we will correct the data set by fixing the date(as date), Year(as function), Pounds(as integer) as well as, creating subsets for each lake
 
 ```{r}
-
 harvestdata$Date <- as.Date(harvestdata$Date, "m%/d%/Y%")
 harvestdata$Year <- as.factor(harvestdata$Year)
 harvestdata$Pounds <- as.integer(harvestdata$Pounds)
