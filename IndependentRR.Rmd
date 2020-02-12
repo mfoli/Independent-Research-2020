@@ -68,7 +68,7 @@ water.dat <- read.csv("waterdata.csv", TRUE)
 #removing the not-needed columns & renaming the needed columns
 
 water.dat <- water.dat[,-c(1,5,8,9,13,20,21)]
-colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops")
+colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops", "Chlorophyta", "Cyanophyta")
 
 #Renaming Each Lake
 
@@ -94,11 +94,11 @@ fiveisland.wq <- subset(water.dat, water.dat$Lake == "Five Island Lake")
 ingham.wq <- subset(water.dat, water.dat$Lake == "Ingham Lake")
 lostisland.wq <- subset(water.dat, water.dat$Lake == "Lost Island Lake")
 silver.wq <- subset(water.dat, water.dat$Lake == "Silver Lake")
-
+high.wq <- subset(water.dat, water.dat$Lake == "High Lake")
 ```
 
 ```{r}
-plot(fiveisland.wq$Date, fiveisland.wq$`Chlorophyll a`)
-plot(center.wq$Date, center.wq$Zoops)
+boxplot(water.dat$Lake, water.dat$`Chlorophyll a`, water.dat$TSS, water.dat$TN)
+?boxplot
 
 ```
