@@ -97,8 +97,28 @@ silver.wq <- subset(water.dat, water.dat$Lake == "Silver Lake")
 high.wq <- subset(water.dat, water.dat$Lake == "High Lake")
 ```
 
+Boxplots of all water quality variables for each Lake 
+
 ```{r}
-boxplot(water.dat$Lake, water.dat$`Chlorophyll a`, water.dat$TSS, water.dat$TN)
-?boxplot
+
+#Nutrient bois
+
+boxplot(water.dat$`Chlorophyll a`~water.dat$Lake, ylab='Chlorphyll a (ug/L)', xlab='Lake', main= 'Chlorphyll a Concentrations of Each Lake')
+boxplot(water.dat$TN~water.dat$Lake, ylab='Total Nitrogen (mg/L)', xlab='Lake', main= 'Total Nitrogen Concentrations of Each Lake')
+boxplot(water.dat$TP~water.dat$Lake, ylab='Total Phosphorous (ug/L)', xlab='Lake', main= 'Total Phosphorous Concentrations of Each Lake')
+
+#Water Clairty
+
+boxplot(water.dat$`Secchi Depth`~water.dat$Lake, ylab= 'Secchi Depth (m)', xlab= 'Lake', main = 'Secchi Depth of Each Lake')
+boxplot(water.dat$TSS~water.dat$Lake, ylab= 'Total Suspended Solids (mg/L)', xlab= 'Lake', main = 'Total Suspended Solids of Each Lake')
+boxplot(water.dat$DO~water.dat$Lake, ylab= 'Dissolved Oxygen (mg/L)', xlab= 'Lake', main = 'Dissolved Oxygen of Each Lake')
+boxplot(water.dat$Turbidity~water.dat$Lake, ylab= 'Turbidity (NTU)', xlab= 'Lake', main = 'Turbidity of Each Lake')
+
+
+#swimmy bois
+boxplot(water.dat$Phyotplankton~water.dat$Lake, ylab= 'Phytoplankton (mg/L)', xlab= 'Lake', main = 'Phytoplankton Densities of Each Lake')
+boxplot(water.dat$Zoops~water.dat$Lake, ylab= 'Zooplankton (mg/L)', xlab= 'Lake', main = 'Zooplankton Densities of Each Lake')
+boxplot(water.dat$Chlorophyta~water.dat$Lake, ylab= 'Chlorophyta (mg/L)', xlab= 'Lake', main= 'Chlorophyta Densities of Each Lake')
+boxplot(water.dat$Cyanophyta~water.dat$Lake, ylab= 'Cyanophyta (mg/L)', xlab= 'Lake', main= 'Cyanophyta Densities of Each Lake')
 
 ```
