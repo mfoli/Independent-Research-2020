@@ -5,15 +5,12 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 # Harvest Data
 Data set for Commercial Harvest from 1997 to 2019 of Iowa Lakes
 First we will correct the data set by correcting the date and year columns as well as removing blank cells and renaming cells
 
 ```{r}
+
 harvest.dat <- read.csv("harvestdata.csv", TRUE)
 harvest.dat$Date <- as.Date(harvest.dat$Date, "m%/d%/Y%")
 harvest.dat$Year <- as.factor(harvest.dat$Year)
