@@ -1,0 +1,217 @@
+---
+title: "first"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+This chunk clears your environment
+```{r,include=FALSE}
+rm(list=ls())
+```
+
+```{r,}
+
+packages<-function(x, repos="http://cran.r-project.org", ...){
+x<-as.character(match.call()[[2]])
+if (!require(x,character.only=TRUE)){
+install.packages(pkgs=x, repos=repos, ...)
+require(x,character.only=TRUE)
+}
+}
+
+packages(rcompanion)
+packages(vegan)
+packages(ggplot2)
+packages(gridExtra)
+packages(reshape2)
+packages(FSA)
+#packages(nnet)
+#packages(multcomp)
+#packages(plyr)
+#packages(rv)
+#packages(arm)
+#packages(lattice)
+#packages(tikzDevice)
+#packages(FSAdata)
+#packages(nlstools)
+#packages(GGally)
+packages(wesanderson)
+#packages(DescTools)
+#packages(mvnormtest)
+#packages(HH)
+#packages(biotools)
+#packages(car)
+#packages(psych)
+#packages(GPArotation)
+#packages(doBy)
+#packages(dplyr)
+packages(tidyr)
+packages(rcompanion)
+#packages(GISTools)
+#packages(maps)
+#packages(mapproj)
+#packages(ggpmisc)
+```
+
+# Harvest Data
+Data set for Commercial Harvest from 1997 to 2019 of Iowa Lakes
+First we will correct the data set by correcting the date and year columns as well as removing blank cells and renaming cells
+
+```{r}
+harvest.dat <- read.csv("harvestdata.csv", TRUE)
+head(harvest.dat)
+harvest.dat$Date <- as.Date(harvest.dat$Date, "%m/%d/%Y")
+harvest.dat$Year <- as.factor(harvest.dat$Year)
+harvest.dat$Month<-as.factor(harvest.dat$Month)
+harvest.dat$Modified.Year<-as.factor(harvest.dat$Modified.Year)
+colnames(harvest.dat)[1] <- c("Lake")
+
+harvest.dat<-droplevels(subset(harvest.dat, Lake != ""))
+harvest.dat$Lake<-as.character(harvest.dat$Lake)
+harvest.dat$Lake[harvest.dat$Lake == "center lake"] <- "Center Lake"
+harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
+harvest.dat$Lake<-as.factor(harvest.dat$Lake)
+levels(harvest.dat$Lake) # 6 lakes all good
+
+str(harvest.dat)
+
+# not sure about the last two columns::
+harvest.dat<-harvest.dat[,-c(10,11)]
+
+# There's a period ( -> . <- ) in one cell in pounds column
+harvest.dat$Pounds[harvest.dat$Pounds == "."] <- 0
+harvest.dat$Pounds<-as.numeric(as.character(harvest.dat$Pounds))
+
+summary(harvest.dat$Pounds)
+```
+
+```{r}
+center.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Center Lake"))
+fiveisland.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Five Island Lake"))
+silver.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Silver Lake"))
+high.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "High Lake"))
+ingham.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Ingham Lake"))
+lostisland.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Lost Island Lake"))
+
+```
+
+Here are summaries for each lake
+
+```{r}
+###Summaries
+summary(center.sub) # 13 values NA in Modified.Year?
+summary(fiveisland.sub)
+summary(high.sub)
+summary(silver.sub)
+summary(high.sub)
+summary(ingham.sub)
+summary(lostisland.sub)
+
+```
+
+plotting data for center lake
+```{r Center Lake Plots}
+plot(center.sub$Date, center.sub$Pounds)
+library(ggplot2)
+library(wesanderson)
+a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
+            geom_bar(stat= "identity", colour = "black")+
+                labs(title = "Harvest in Pounds through Time",
+                 x="Date",
+                 y="Pounds Removed") +
+            facet_grid(Lake~.)+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = c(0.91,0.8),
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+a
+```
+
+
+
+# Water Quality Data
+
+Same thing as harvest data but with water quality
+
+```{r}
+water.dat <- read.csv("waterdata.csv", TRUE)
+
+#removing the not-needed columns & renaming the needed columns
+
+water.dat <- water.dat[,-c(1,5,8,9,13,20,21)]
+colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops", "Chlorophyta", "Cyanophyta")
+
+#Renaming Each Lake
+
+water.dat$Date <- as.Date(water.dat$Date, "%m/%d/%Y")
+water.dat<-droplevels(subset(water.dat, Lake != ""))
+water.dat$Lake <- as.character(water.dat$Lake)
+water.dat$Lake[water.dat$Lake == "(019) Center Lake (Dickinson ) "] <- "Center Lake"
+water.dat$Lake[water.dat$Lake == "(036) Five Island Lake (Palo Alto ) "] <- "Five Island Lake"
+water.dat$Lake[water.dat$Lake == "(048) Ingham Lake (Emmet ) "] <- "Ingham Lake"
+water.dat$Lake[water.dat$Lake == "(077) Lost Island Lake (Palo Alto ) "] <- "Lost Island Lake"
+water.dat$Lake[water.dat$Lake == "(105) Silver Lake (Dickinson) (Dickinson ) "] <- "Silver Lake"
+water.dat$Lake <- as.factor(water.dat$Lake)
+levels(water.dat$Lake)
+
+```
+
+Subsetting each Lake in the Water Quality data set
+
+```{r}
+
+center.wq <- droplevels(subset(water.dat, water.dat$Lake == "Center Lake"))
+fiveisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Five Island Lake"))
+ingham.wq <- droplevels(subset(water.dat, water.dat$Lake == "Ingham Lake"))
+lostisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Lost Island Lake"))
+silver.wq <- droplevels(subset(water.dat, water.dat$Lake == "Silver Lake"))
+high.wq <- droplevels(subset(water.dat, water.dat$Lake == "High Lake"))
+```
+
+Boxplots of all water quality variables for each Lake 
+
+```{r}
+
+hist(water.dat$`Chlorophyll a`)
+hist(water.dat$TN)
+hist(water.dat$TP)
+hist(water.dat$`Secchi Depth`)
+
+#Nutrient bois
+
+dev.off()
+plot.new()
+par(mfrow=c(3,1), # set parameters of plot to 3 rows and 1 column
+    mar=c(4,4,2,2)) # margins around each plot -- Bottom, Left, Top, Right
+boxplot(water.dat$`Chlorophyll a`~water.dat$Lake, ylab='Chlorphyll a (ug/L)', xlab='Lake', main= 'Chlorphyll a Concentrations of Each Lake')
+boxplot(water.dat$TN~water.dat$Lake, ylab='Total Nitrogen (mg/L)', xlab='Lake', main= 'Total Nitrogen Concentrations of Each Lake')
+boxplot(water.dat$TP~water.dat$Lake, ylab='Total Phosphorous (ug/L)', xlab='Lake', main= 'Total Phosphorous Concentrations of Each Lake')
+
+#Water Clairty
+dev.off()
+plot.new()
+par(mfrow=c(4,1), # set plot parameters to 4 rows one column
+    mar=c(4,4,2,2))
+boxplot(water.dat$`Secchi Depth`~water.dat$Lake, ylab= 'Secchi Depth (m)', xlab= 'Lake', main = 'Secchi Depth of Each Lake')
+boxplot(water.dat$TSS~water.dat$Lake, ylab= 'Total Suspended Solids (mg/L)', xlab= 'Lake', main = 'Total Suspended Solids of Each Lake')
+boxplot(water.dat$DO~water.dat$Lake, ylab= 'Dissolved Oxygen (mg/L)', xlab= 'Lake', main = 'Dissolved Oxygen of Each Lake')
+boxplot(water.dat$Turbidity~water.dat$Lake, ylab= 'Turbidity (NTU)', xlab= 'Lake', main = 'Turbidity of Each Lake')
+
+
+#swimmy boi
+dev.off()
+plot.new()
+par(mfrow=c(4,1), # set plot parameters to 4 rows one column
+    mar=c(4,4,2,2))
+boxplot(water.dat$Phyotplankton~water.dat$Lake, ylab= 'Phytoplankton (mg/L)', xlab= 'Lake', main = 'Phytoplankton Densities of Each Lake')
+boxplot(water.dat$Zoops~water.dat$Lake, ylab= 'Zooplankton (mg/L)', xlab= 'Lake', main = 'Zooplankton Densities of Each Lake')
+boxplot(water.dat$Chlorophyta~water.dat$Lake, ylab= 'Chlorophyta (mg/L)', xlab= 'Lake', main= 'Chlorophyta Densities of Each Lake')
+boxplot(water.dat$Cyanophyta~water.dat$Lake, ylab= 'Cyanophyta (mg/L)', xlab= 'Lake', main= 'Cyanophyta Densities of Each Lake')
+
+```
+
+
