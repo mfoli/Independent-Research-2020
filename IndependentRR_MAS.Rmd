@@ -125,32 +125,12 @@ harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
 harvest.dat$Lake<-as.factor(harvest.dat$Lake)
 levels(harvest.dat$Lake) # 6 lakes all good
 
-# setting acres
-harvest.dat$Acres[harvest.dat$Lake == "Center Lake"] <- 220
-harvest.dat$Acres[harvest.dat$Lake == "Five Island Lake"] <- 964
-harvest.dat$Acres[harvest.dat$Lake == "High Lake"] <- 467
-harvest.dat$Acres[harvest.dat$Lake == "Ingham Lake"] <- 370
-harvest.dat$Acres[harvest.dat$Lake == "Lost Island Lake"] <- 1162
-harvest.dat$Acres[harvest.dat$Lake == "Silver Lake"] <- 1032
-
-
-str(harvest.dat)
-
-# not sure about the last two columns before acres::
-harvest.dat<-harvest.dat[,-c(10,11)]
 
 # There's a period ( -> . <- ) in one cell in pounds column, making it a factor
 harvest.dat$Pounds[harvest.dat$Pounds == "."] <- 0
 harvest.dat$Pounds<-as.numeric(as.character(harvest.dat$Pounds))
 summary(harvest.dat$Pounds)
 
-###############################################
-#
-#    Predictor variable standardized by lake: pounds per acre; kg/ha
-#
-
-harvest.dat$Std.Removal.lbs<-harvest.dat$Pounds/harvest.dat$Acres
-harvest.dat$Std.Removal.kg<-harvest.dat$Std.Removal.lbs/1.12085 
 
 # Delete extraneous info: angler
 harvest.dat<-harvest.dat[,-c(2,3)]
@@ -178,7 +158,6 @@ summary(center.sub)
 summary(fiveisland.sub)
 summary(high.sub)
 summary(silver.sub)
-summary(high.sub)
 summary(ingham.sub)
 summary(lostisland.sub)
 
@@ -202,7 +181,7 @@ a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
                               legend.title = element_blank(),
                               legend.background = element_rect(colour="grey20"))
 
-b <- ggplot(harvest.dat, aes(x=Year,y=Std.Removal.lbs, fill = Species))+
+b <- ggplot(harvest.dat, aes(x=Year,y= Pounds.Acre, fill = Species))+
             geom_bar(stat= "identity", colour = "black")+
                 labs(title = "Harvest in Pounds per Acre through Time",
                  x="Date",
