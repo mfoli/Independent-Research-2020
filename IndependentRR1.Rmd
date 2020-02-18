@@ -76,9 +76,6 @@ levels(harvest.dat$Lake) # 6 lakes all good
 
 str(harvest.dat)
 
-# not sure about the last two columns::
-harvest.dat<-harvest.dat[,-c(10,11)]
-
 # There's a period ( -> . <- ) in one cell in pounds column
 harvest.dat$Pounds[harvest.dat$Pounds == "."] <- 0
 harvest.dat$Pounds<-as.numeric(as.character(harvest.dat$Pounds))
