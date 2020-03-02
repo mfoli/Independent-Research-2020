@@ -330,7 +330,23 @@ Action Items:
 ------------  So the overall data frame will look like:
 Lake| Year* | Pounds Carp | Pounds Buff | Prop. harvested carp | Prop. harvested buff | TSI | Y variables
 
+## Loading in Yearly Change Dataset
+
 ```{r}
+yearchange.dat <- read.csv("Changesdata.csv", TRUE) 
+colnames(yearchange.dat)[1] <- c("Lake")
+yearchange.dat <- yearchange.dat[,-c(3,5)] #removing not needed columns
+
+#Setting Year as factor
+yearchange.dat$Year <- as.factor(yearchange.dat$Year)
+
+#Subsetting each lake for future use
+center.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Center Lake"))
+fiveisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Five Island Lake"))
+ingham.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Ingham Lake"))
+lostisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Lost Island Lake"))
+silver.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Silver Lake"))
+high.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "High Lake"))
 
 ```
 
