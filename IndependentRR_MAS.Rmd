@@ -404,7 +404,7 @@ c<-ggplot(change.dat.m.a, aes(x=value))+
                               legend.background = element_rect(colour="grey20"))
 c
 
-ggpairs(yearchange.dat[,9:20])
+ggpairs(yearchange.dat[,8:19])
 
 ```
 
