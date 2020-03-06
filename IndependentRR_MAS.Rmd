@@ -352,10 +352,14 @@ high.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "High Lake")
 
 ```
 
+### Distribution of response variables: TSS, Secchi Depth, Dissolved Oxygen
+
+These represent the count(frequency) for each response variable along it's range. geom_density from ggplot2 is a smoothed version of the histogram, useful for continuous random variables.
+
 ```{r}
 #Plotting TSS, Secchi, DO
-
-change.dat.m.a<-melt(yearchange.dat[,c(1,10,13,14)])
+head(yearchange.dat)
+change.dat.m.a<-melt(yearchange.dat[,c(1,10,13,14)]) # TSS col 10, Secchi col 13, 
 
 a<-ggplot(change.dat.m.a, aes(x=value))+
       geom_histogram(colour = "black", fill = "white")+
@@ -372,9 +376,9 @@ a
 
 #Plotting TN and TP
 
-change.dat.m.a<-melt(yearchange.dat[,c(1,11,12)])
+change.dat.m.b<-melt(yearchange.dat[,c(1,11,12)]) # TN and TP
 
-b<-ggplot(change.dat.m.a, aes(x=value))+
+b<-ggplot(change.dat.m.b, aes(x=value))+
       geom_histogram(colour = "black", fill = "white")+
       geom_density(alpha=.2, fill = "#FF6666")+
             facet_grid(Lake~variable, scales = "free")+
@@ -389,9 +393,9 @@ b
 
 #Plotting TSI, Cholorophyll, Phytoplankton, Zoops, chlorophyta, and cyanophyta
 
-change.dat.m.a<-melt(yearchange.dat[,c(1,8,9,16,17,18,19)])
+change.dat.m.c<-melt(yearchange.dat[,c(1,8,9,16,17,18,19)])
 
-c<-ggplot(change.dat.m.a, aes(x=value))+
+c<-ggplot(change.dat.m.c, aes(x=value))+
       geom_histogram(colour = "black", fill = "white")+
       geom_density(alpha=.2, fill = "#FF6666")+
             facet_grid(Lake~variable, scales = "free")+
@@ -403,8 +407,13 @@ c<-ggplot(change.dat.m.a, aes(x=value))+
                               legend.title = element_blank(),
                               legend.background = element_rect(colour="grey20"))
 c
-
-ggpairs(yearchange.dat[,8:19])
-
 ```
+
+### pairs plot from GGally
+
+```{r,}
+ggpairs(yearchange.dat[,8:19])
+```
+
+
 
