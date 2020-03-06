@@ -29,6 +29,10 @@ packages(reshape2)
 packages(tidyr)
 packages(rcompanion)
 packages(scales)
+<<<<<<< HEAD
+=======
+packages(GGally)
+>>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
 # set figure margins for knitting
 knitr::opts_chunk$set(fig.width=8, fig.height=12)
@@ -125,6 +129,7 @@ harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
 harvest.dat$Lake<-as.factor(harvest.dat$Lake)
 levels(harvest.dat$Lake) # 6 lakes all good
 
+<<<<<<< HEAD
 # setting acres
 harvest.dat$Acres[harvest.dat$Lake == "Center Lake"] <- 220
 harvest.dat$Acres[harvest.dat$Lake == "Five Island Lake"] <- 964
@@ -138,12 +143,15 @@ str(harvest.dat)
 
 # not sure about the last two columns before acres::
 harvest.dat<-harvest.dat[,-c(10,11)]
+=======
+>>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
 # There's a period ( -> . <- ) in one cell in pounds column, making it a factor
 harvest.dat$Pounds[harvest.dat$Pounds == "."] <- 0
 harvest.dat$Pounds<-as.numeric(as.character(harvest.dat$Pounds))
 summary(harvest.dat$Pounds)
 
+<<<<<<< HEAD
 ###############################################
 #
 #    Predictor variable standardized by lake: pounds per acre; kg/ha
@@ -151,6 +159,8 @@ summary(harvest.dat$Pounds)
 
 harvest.dat$Std.Removal.lbs<-harvest.dat$Pounds/harvest.dat$Acres
 harvest.dat$Std.Removal.kg<-harvest.dat$Std.Removal.lbs/1.12085 
+=======
+>>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
 # Delete extraneous info: angler
 harvest.dat<-harvest.dat[,-c(2,3)]
@@ -178,7 +188,10 @@ summary(center.sub)
 summary(fiveisland.sub)
 summary(high.sub)
 summary(silver.sub)
+<<<<<<< HEAD
 summary(high.sub)
+=======
+>>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 summary(ingham.sub)
 summary(lostisland.sub)
 
@@ -202,7 +215,11 @@ a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
                               legend.title = element_blank(),
                               legend.background = element_rect(colour="grey20"))
 
+<<<<<<< HEAD
 b <- ggplot(harvest.dat, aes(x=Year,y=Std.Removal.lbs, fill = Species))+
+=======
+b <- ggplot(harvest.dat, aes(x=Year,y= Pounds.Acre, fill = Species))+
+>>>>>>> f55d866abf72316a738c801677160efdbb23b65a
             geom_bar(stat= "identity", colour = "black")+
                 labs(title = "Harvest in Pounds per Acre through Time",
                  x="Date",
@@ -317,4 +334,126 @@ c
 
 ```
 
+<<<<<<< HEAD
+=======
+## Update 2/24/2020
+
+After meeting with Audrey and Phil, we have a new format for how to arrange the data. The general model format is:
+
+\[
+TSI \approx \beta_0 + L_i + (\beta_c * C_{li} * H_i) + (\beta_b * (1-C_{li}) * H_i)
+\]
+
+where i is indexed on year, l is indexed on lake, L is a fixed lake effect, C is the proportion of harvest made up by carp, 1-C is the proportion of harvest made up by buffalo, H is the total harvest. 
+
+Action Items:
+
+- Calculate Mean TSI (average of TSI for TP, Secchi, Chla) taken from the June measurements. When a measurement from June is not available, we took the next closest measurement to one full year after the previous year's measurement date. 
+
+- From those mean TSI values, calculate the chanage in TSI from year a to year b. 
+
+- Apply same change in variable between year a and year b for other WQ variables.
+
+### New data frame
+
+- Lake
+
+- Year*: Year B for water quality stuff (represents the change in Y between year A and B)
+- Year*: Total and proportional harvests between years a and b (September A to April B)
+
+- Include the amount (pounds) of carp harvested and buffalo harvested between years A and B
+
+- Create a new variable of the proportion of total harvest (lbs of species / lbs of both species) for carp and buffalo between years A and B
+
+- TSI and other response variables, as the change in Y from year A to year B
+
+------------  So the overall data frame will look like:
+Lake| Year* | Pounds Carp | Pounds Buff | Prop. harvested carp | Prop. harvested buff | TSI | Y variables
+
+## Loading in Yearly Change Dataset
+
+```{r}
+yearchange.dat <- read.csv("Changesdata.csv", TRUE) 
+colnames(yearchange.dat)[1] <- c("Lake")
+
+
+#Setting Year as factor
+yearchange.dat$Year <- as.factor(yearchange.dat$Year)
+
+
+#Subsetting each lake for future use
+center.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Center Lake"))
+fiveisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Five Island Lake"))
+ingham.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Ingham Lake"))
+lostisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Lost Island Lake"))
+silver.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Silver Lake"))
+high.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "High Lake"))
+
+```
+
+### Distribution of response variables: TSS, Secchi Depth, Dissolved Oxygen
+
+These represent the count(frequency) for each response variable along it's range. geom_density from ggplot2 is a smoothed version of the histogram, useful for continuous random variables.
+
+```{r}
+#Plotting TSS, Secchi, DO
+head(yearchange.dat)
+change.dat.m.a<-melt(yearchange.dat[,c(1,10,13,14)]) # TSS col 10, Secchi col 13, 
+
+a<-ggplot(change.dat.m.a, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+a
+
+#Plotting TN and TP
+
+change.dat.m.b<-melt(yearchange.dat[,c(1,11,12)]) # TN and TP
+
+b<-ggplot(change.dat.m.b, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+b
+
+#Plotting TSI, Cholorophyll, Phytoplankton, Zoops, chlorophyta, and cyanophyta
+
+change.dat.m.c<-melt(yearchange.dat[,c(1,8,9,16,17,18,19)])
+
+c<-ggplot(change.dat.m.c, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+c
+```
+
+### pairs plot from GGally
+
+```{r,}
+ggpairs(yearchange.dat[,8:19])
+```
+
+
+>>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
