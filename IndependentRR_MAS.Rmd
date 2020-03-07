@@ -15,10 +15,10 @@ rm(list=ls())
 ```{r, include = F}
 # This function checks and pre-loads packages for use
 packages<-function(x, repos="http://cran.r-project.org", ...){
-x<-as.character(match.call()[[2]])
-if (!require(x,character.only=TRUE)){
-install.packages(pkgs=x, repos=repos, ...)
-require(x,character.only=TRUE)
+  x<-as.character(match.call()[[2]])
+      if (!require(x,character.only=TRUE)){
+          install.packages(pkgs=x, repos=repos, ...)
+        require(x,character.only=TRUE)
 }
 }
 # install and attach packages
@@ -29,10 +29,7 @@ packages(reshape2)
 packages(tidyr)
 packages(rcompanion)
 packages(scales)
-<<<<<<< HEAD
-=======
 packages(GGally)
->>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
 # set figure margins for knitting
 knitr::opts_chunk$set(fig.width=8, fig.height=12)
@@ -83,7 +80,7 @@ Shoreline Complexity    | 1.20          | 3.26             |               | 1.5
 
 ## Water Quality Data
 
-Water quality data (summarized above) is available from ISU and Iowa DNR through an online data base and the Limnology Laboratory, headed at ISU by Dr. Grace Wilkonson, EEOB. This is part of the Ambient Lake Monitoring Program that collects a suite of variables in 130 lakes in Iowa that are designated as "Significant Publicly Owned Lakes" and data is available from 2000 to 2015, except in 2008. Further data (2016-2018) may also be available. These lakes are visited 2-3 (almost always 3) times per year from spring to fall and in-situ measurements are taken as well as samples removed for laboratory analysis of biological and chemical components. 
+Water quality data (summarized above) is available from ISU and Iowa DNR through an online data base and the Limnology Laboratory, headed at ISU by Dr. Grace Wilkonson, EEOB. This is part of the Ambient Lake Monitoring Program that collects a suite of variables at 130 lakes in Iowa that are designated as "Significant Publicly Owned Lakes" and data is available from 2000 to 2015, except in 2008. Further data (2016-2019) may also be available for inclusion toward the end of this project's timeframe. These lakes are visited 2-3 (almost always 3) times per year from spring to fall and in-situ measurements are taken as well as samples removed for laboratory analysis of biological and chemical components. 
 
 Lakes fluctuate over time in cycles of stratification, turnover, zooplankton and algal blooms, etc. so these snapshots in time can be problematic. Still, we have identified a suite of variables that we expect to respond to the biomanipulation (harvest) of carp and buffalo. Also, of course, these variables are common metrics used to designate water bodies as "degraded" or "healthy" and could provide insight into food web processes in the lake. The variables are summarized here:
 
@@ -98,20 +95,22 @@ Total Phosphorous       | Mean, Maximum      | $\mu g/L$        | Decrease with 
 Total Nitrogen          | Mean, Maximum      | $mg/L$           | Decrease with carp removal (resuspension)
                         |                    |                  |
 Zooplankton Biomass     | Mean               | $\mu g/L$        | Increase with buffalo removal (trophic release)
-Chlorophyll a           | Mean, Maximum      | $\mu g/L$        | Decrease with carp and buffalo removal
+Chlorophyll _a_         | Mean, Maximum      | $\mu g/L$        | Decrease with carp and buffalo removal
 Phytoplankton Biomass   | Mean               | $mg/L$           | Decrease with both carp and buffalo removal (bottom up and top down pathways)
 _Cyanophyta_            | Mean               | $mg/L$           | Decrease with carp and buffalo removal (nutrient shift and zoop shift)
 _Chlorophyta_           | Mean               | $mg/L$           | Decrease with both carp and buffalo removal
 
-- _A Trophic State Index (TSI) can also be calculated for Secchi Depth, Chlorophyll a, and Total Phosphorus._ We may choose to pick these response variables as well, however, we do not expect the overall Trophic State of these lakes to change. Still, a directional shift in each of those three components may be indicative of the desired change in water quality from biomanipulation of rough fish.
+__Trophic State Index__ | Calculated from Chl _a_ | Index Value | Decrease with both carp and buffalo removal; but not out of hyper-eurtrophic state.
+
+- _A Trophic State Index (TSI) can also be calculated for Secchi Depth, and Total Phosphorus._ We will choose to pick chlorophyll _a_ as a response variables, because the the developer of the index (Carlson 1977) said in 1983 that averaging the three values was not appropriate, and chlorophyll _a_ was the best measurement to use out of the three. We do not expect the TSI to decrease out of the eutrophic range, but a directional shift in TSI may be indicative of the desired change in water quality from biomanipulation of rough fish.
 
 
-# Data Analysis
+## Data Analysis
 
-## Loading in Harvest Data
+### Loading in Harvest Data
 
 - Data set for Commercial Harvest from 1997 to 2019 of Iowa Lakes
-- First we will correct the data set by correcting the date and year columns as well as removing blank cells and renaming cells
+- Plot the distribution of harvest in total pounds removed (left) and pounds per acre removed (right). The number of bars across the box plots indicate the number of harvest dates in that year due to "stacking" within a year. The colors represent the different species.
 
 ```{r, include = F}
 harvest.dat <- read.csv("harvestdata.csv", TRUE)
@@ -129,7 +128,7 @@ harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
 harvest.dat$Lake<-as.factor(harvest.dat$Lake)
 levels(harvest.dat$Lake) # 6 lakes all good
 
-<<<<<<< HEAD
+
 # setting acres
 harvest.dat$Acres[harvest.dat$Lake == "Center Lake"] <- 220
 harvest.dat$Acres[harvest.dat$Lake == "Five Island Lake"] <- 964
@@ -143,15 +142,14 @@ str(harvest.dat)
 
 # not sure about the last two columns before acres::
 harvest.dat<-harvest.dat[,-c(10,11)]
-=======
->>>>>>> f55d866abf72316a738c801677160efdbb23b65a
+
 
 # There's a period ( -> . <- ) in one cell in pounds column, making it a factor
 harvest.dat$Pounds[harvest.dat$Pounds == "."] <- 0
 harvest.dat$Pounds<-as.numeric(as.character(harvest.dat$Pounds))
 summary(harvest.dat$Pounds)
 
-<<<<<<< HEAD
+
 ###############################################
 #
 #    Predictor variable standardized by lake: pounds per acre; kg/ha
@@ -159,8 +157,6 @@ summary(harvest.dat$Pounds)
 
 harvest.dat$Std.Removal.lbs<-harvest.dat$Pounds/harvest.dat$Acres
 harvest.dat$Std.Removal.kg<-harvest.dat$Std.Removal.lbs/1.12085 
-=======
->>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
 # Delete extraneous info: angler
 harvest.dat<-harvest.dat[,-c(2,3)]
@@ -188,17 +184,14 @@ summary(center.sub)
 summary(fiveisland.sub)
 summary(high.sub)
 summary(silver.sub)
-<<<<<<< HEAD
 summary(high.sub)
-=======
->>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 summary(ingham.sub)
 summary(lostisland.sub)
 
 ```
 
 ### Harvest through time
-```{r, echo = F}
+```{r, include = F}
 
 a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
             geom_bar(stat= "identity", colour = "black")+
@@ -215,11 +208,10 @@ a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
                               legend.title = element_blank(),
                               legend.background = element_rect(colour="grey20"))
 
-<<<<<<< HEAD
-b <- ggplot(harvest.dat, aes(x=Year,y=Std.Removal.lbs, fill = Species))+
-=======
-b <- ggplot(harvest.dat, aes(x=Year,y= Pounds.Acre, fill = Species))+
->>>>>>> f55d866abf72316a738c801677160efdbb23b65a
+
+
+
+b <- ggplot(harvest.dat, aes(x=Year,y= Std.Removal.lbs, fill = Species))+
             geom_bar(stat= "identity", colour = "black")+
                 labs(title = "Harvest in Pounds per Acre through Time",
                  x="Date",
@@ -281,7 +273,7 @@ high.wq <- droplevels(subset(water.dat, water.dat$Lake == "High Lake"))
 
 ### Distribution of water quality variables, for each Lake 
 
-```{r, echo=F, warning = F}
+```{r, include = F}
 #summary(water.dat)
 # first plot: TSS, Secchi, DO (so three columns, 6 rows)
 water.dat.m.a<-melt(water.dat[,c(1,5,10,14)])
@@ -334,8 +326,6 @@ c
 
 ```
 
-<<<<<<< HEAD
-=======
 ## Update 2/24/2020
 
 After meeting with Audrey and Phil, we have a new format for how to arrange the data. The general model format is:
@@ -372,7 +362,7 @@ Lake| Year* | Pounds Carp | Pounds Buff | Prop. harvested carp | Prop. harvested
 
 ## Loading in Yearly Change Dataset
 
-```{r}
+```{r, echo = F, warning=F}
 yearchange.dat <- read.csv("Changesdata.csv", TRUE) 
 colnames(yearchange.dat)[1] <- c("Lake")
 
@@ -395,7 +385,7 @@ high.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "High Lake")
 
 These represent the count(frequency) for each response variable along it's range. geom_density from ggplot2 is a smoothed version of the histogram, useful for continuous random variables.
 
-```{r}
+```{r, echo = F, warning=F}
 #Plotting TSS, Secchi, DO
 head(yearchange.dat)
 change.dat.m.a<-melt(yearchange.dat[,c(1,10,13,14)]) # TSS col 10, Secchi col 13, 
@@ -448,12 +438,19 @@ c<-ggplot(change.dat.m.c, aes(x=value))+
 c
 ```
 
+
+#### We can drop High lake if the data is problematic
+
+
 ### pairs plot from GGally
 
 ```{r,}
+# ggpairs(yearchange.dat[,8:19])
+# too many!
+
 ggpairs(yearchange.dat[,8:19])
+
 ```
 
 
->>>>>>> f55d866abf72316a738c801677160efdbb23b65a
 
