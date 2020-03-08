@@ -338,9 +338,9 @@ where i is indexed on year, l is indexed on lake, L is a fixed lake effect, C is
 
 Action Items:
 
-- Calculate Mean TSI (average of TSI for TP, Secchi, Chla) taken from the June measurements. When a measurement from June is not available, we took the next closest measurement to one full year after the previous year's measurement date. 
+- Calculate TSI Chla taken from the June measurements. When a measurement from June is not available, we took the next closest measurement to one full year after the previous year's measurement date. 
 
-- From those mean TSI values, calculate the chanage in TSI from year a to year b. 
+- From those TSI values, calculate the chanage in TSI from year a to year b. 
 
 - Apply same change in variable between year a and year b for other WQ variables.
 
