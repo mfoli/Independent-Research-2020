@@ -126,13 +126,16 @@ harvest.dat$Lake<-as.character(harvest.dat$Lake)
 harvest.dat$Lake[harvest.dat$Lake == "center lake"] <- "Center Lake"
 harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
 harvest.dat$Lake<-as.factor(harvest.dat$Lake)
-levels(harvest.dat$Lake) # 6 lakes all good
+
+#Removing High Lake from the Dataset
+harvest.dat <- droplevels(subset(harvest.dat, Lake != "High Lake"))
+levels(harvest.dat$Lake) # 5 lakes all good
 
 
 # setting acres
 harvest.dat$Acres[harvest.dat$Lake == "Center Lake"] <- 220
 harvest.dat$Acres[harvest.dat$Lake == "Five Island Lake"] <- 964
-harvest.dat$Acres[harvest.dat$Lake == "High Lake"] <- 467
+#harvest.dat$Acres[harvest.dat$Lake == "High Lake"] <- 467
 harvest.dat$Acres[harvest.dat$Lake == "Ingham Lake"] <- 370
 harvest.dat$Acres[harvest.dat$Lake == "Lost Island Lake"] <- 1162
 harvest.dat$Acres[harvest.dat$Lake == "Silver Lake"] <- 1032
@@ -171,7 +174,7 @@ str(harvest.dat)
 center.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Center Lake"))
 fiveisland.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Five Island Lake"))
 silver.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Silver Lake"))
-high.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "High Lake"))
+#high.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "High Lake"))
 ingham.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Ingham Lake"))
 lostisland.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Lost Island Lake"))
 
@@ -182,7 +185,7 @@ lostisland.sub <- droplevels(subset(harvest.dat, harvest.dat$Lake == "Lost Islan
 ###Summaries
 summary(center.sub) 
 summary(fiveisland.sub)
-summary(high.sub)
+#summary(high.sub)
 summary(silver.sub)
 summary(high.sub)
 summary(ingham.sub)
@@ -241,6 +244,10 @@ water.dat <- read.csv("waterdata.csv", TRUE)
 water.dat <- water.dat[,-c(1,5,8,9,13,20,21)] # M Foli CHeck these two lines for accuracy please!
 colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops", "Chlorophyta", "Cyanophyta")
 
+#Removing High Lake from the dataset
+
+water.dat <- droplevels(subset(water.dat, Lake != "High Lake"))
+
 #Renaming Each Lake
 
 water.dat$Date <- as.Date(water.dat$Date, "%m/%d/%Y")
@@ -268,7 +275,7 @@ fiveisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Five Island Lak
 ingham.wq <- droplevels(subset(water.dat, water.dat$Lake == "Ingham Lake"))
 lostisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Lost Island Lake"))
 silver.wq <- droplevels(subset(water.dat, water.dat$Lake == "Silver Lake"))
-high.wq <- droplevels(subset(water.dat, water.dat$Lake == "High Lake"))
+#high.wq <- droplevels(subset(water.dat, water.dat$Lake == "High Lake"))
 ```
 
 ### Distribution of water quality variables, for each Lake 
@@ -370,6 +377,9 @@ colnames(yearchange.dat)[1] <- c("Lake")
 #Setting Year as factor
 yearchange.dat$Year <- as.factor(yearchange.dat$Year)
 
+#Removing High Lake from the Dataset
+
+yearchange.dat <- droplevels(subset(yearchange.dat, Lake != "High Lake"))
 
 #Subsetting each lake for future use
 center.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Center Lake"))
@@ -377,7 +387,7 @@ fiveisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Five 
 ingham.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Ingham Lake"))
 lostisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Lost Island Lake"))
 silver.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Silver Lake"))
-high.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "High Lake"))
+#high.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "High Lake"))
 
 ```
 
