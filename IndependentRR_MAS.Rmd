@@ -80,7 +80,7 @@ Shoreline Complexity    | 1.20          | 3.26             |               | 1.5
 
 ## Water Quality Data
 
-Water quality data (summarized above) is available from ISU and Iowa DNR through an online data base and the Limnology Laboratory, headed at ISU by Dr. Grace Wilkonson, EEOB. This is part of the Ambient Lake Monitoring Program that collects a suite of variables at 130 lakes in Iowa that are designated as "Significant Publicly Owned Lakes" and data is available from 2000 to 2015, except in 2008. Further data (2016-2019) may also be available for inclusion toward the end of this project's timeframe. These lakes are visited 2-3 (almost always 3) times per year from spring to fall and in-situ measurements are taken as well as samples removed for laboratory analysis of biological and chemical components. 
+Water quality data (summarized above) is available from ISU and Iowa DNR through an online data base and the Limnology Laboratory, headed at ISU by Dr. Grace Wilkinson, EEOB. This is part of the Ambient Lake Monitoring Program that collects a suite of variables at 132 lakes in Iowa that are designated as "Principal Recreation Lakes" and data is available from 2000 to 2015, except in 2008. Further data (2016-2019) may also be available for inclusion toward the end of this project's timeframe. These lakes are visited 2-3 (almost always 3) times per year from spring to fall and in-situ measurements are taken as well as samples removed for laboratory analysis of biological and chemical components. 
 
 Lakes fluctuate over time in cycles of stratification, turnover, zooplankton and algal blooms, etc. so these snapshots in time can be problematic. Still, we have identified a suite of variables that we expect to respond to the biomanipulation (harvest) of carp and buffalo. Also, of course, these variables are common metrics used to designate water bodies as "degraded" or "healthy" and could provide insight into food web processes in the lake. The variables are summarized here:
 
@@ -102,7 +102,7 @@ _Chlorophyta_           | Mean               | $mg/L$           | Decrease with 
 
 __Trophic State Index__ | Calculated from Chl _a_ | Index Value | Decrease with both carp and buffalo removal; but not out of hyper-eurtrophic state.
 
-- _A Trophic State Index (TSI) can also be calculated for Secchi Depth, and Total Phosphorus._ We will choose to pick chlorophyll _a_ as a response variables, because the the developer of the index (Carlson 1977) said in 1983 that averaging the three values was not appropriate, and chlorophyll _a_ was the best measurement to use out of the three. We do not expect the TSI to decrease out of the eutrophic range, but a directional shift in TSI may be indicative of the desired change in water quality from biomanipulation of rough fish.
+- _A Trophic State Index (TSI) can also be calculated for Secchi Depth, and Total Phosphorus._ We will choose to pick chlorophyll _a_ as the response variable, because the developer of the index (Carlson 1977) said in 1983 that averaging the three values was not appropriate, and chlorophyll _a_ was the best measurement to use out of the three. We do not expect the TSI to decrease out of the eutrophic range, but a directional shift in TSI may be indicative of the desired change in water quality from biomanipulation of rough fish.
 
 
 ## Data Analysis
