@@ -1,0 +1,485 @@
+---
+title: "Commercial Fish Harvest ~ Water Quality"
+subtitle: "Shallow Natural Lakes of Northwest Iowa"
+author: "Matthew Foli & Martin Simonson"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,include=FALSE}
+# This chunk clears your environment, if you're like me and it gets messy over there.
+rm(list=ls())
+```
+
+```{r, include = F}
+# This function checks and pre-loads packages for use
+packages<-function(x, repos="http://cran.r-project.org", ...){
+  x<-as.character(match.call()[[2]])
+      if (!require(x,character.only=TRUE)){
+          install.packages(pkgs=x, repos=repos, ...)
+        require(x,character.only=TRUE)
+}
+}
+# install and attach packages
+packages(knitr)
+packages(ggplot2)
+packages(gridExtra)
+packages(reshape2)
+packages(tidyr)
+packages(rcompanion)
+packages(scales)
+packages(GGally)
+
+# set figure margins for knitting
+knitr::opts_chunk$set(fig.width=8, fig.height=12)
+
+```
+
+
+# Overall Objective
+
+Our aim is to quantify relationships between commercial harvest of "rough fish" (common carp and bigmouth buffalo) against a suite of water quality variables. The term _water quality_ itself can be subjective, but here we have identified multiple potential response variables that are often associated with "clean" or "impaired" water body designations. They fall into three broad categories: 
+
+- __Nutrients:__ Trophic State Index (TSI, Carlson 1977);Total Phosphorous ($\mu g/L$); Total Nitrogen ($mg/L$)
+
+- __Physical:__ Secchi depth ($m, meters$); Total Suspended Solids ($\mu g/L$); Dissolved Oxygen ($mg/L$)
+
+- __Biological:__ Total Zooplankton Biomass; Total Phytoplankton Biomass; Phytoplankton Biomass of _Cyanophyta_; Phytoplankton Biomass of _Chlorophyta_
+
+# Study Area
+
+Marty's dissertation research is focused on shallow, natural lakes of Iowa. Commercial Harvest of bigmouth buffalo occurs in some 20 lakes and rivers in Iowa, and over half of them fall into the shallow natural lake category. Since 1) Common carp are strongly suspected to disturb ecosystems and force shallow lakes into a turbid, algae-dominated state and 2) Bigmouth Buffalo may regulate zooplankton that graze on algae, the Iowa DNR is interested to see if managing these populations of fish can restore elusive water quality in Iowa and shift these lakes into a clear-water macrophyte and piscivore dominated lake systems.
+
+Commercial harvest of these species is complex and variable with weather conditions, equipment, staffing, invasive species control, permitting, supply chain management, and market fluctuations affecting how much effort commercial anglers can put into catching fish, and where they focus that effort. Fishing is restricted to times of year when water temperatures are below 70$^\circ F$, or basically between Memorial Day and and October-ish. That being said, _there might be some overlap between harvest dates and ambient lake monitoring samples (described below)_.
+
+__One final note on the study area:__ We can incorporate other lakes that fit our selection criteria but do not have commercial harvest of rough fish species. Not that they are a perfect control, but it could help explain any year-to-year variation in response variables across our study region.
+
+
+# Introducing the Data
+
+## Harvest Data
+
+We do not have abundance data for carp and buffalo for more than a couple of years in a subset of lakes. However, based on available data from the Spirit Lake District Fisheries Office, we have total pounds removed at multiple time points spanning 25 years in about a dozen lakes. We have identified a subset of these lakes based on similarity in geographic location, lake morphometry, fish communities, and regular harvest periods. Data is provided in total pounds removed, however due to differences in lake size and capacity to hold fish, we will standardize data by kilograms per hectare. The lakes are summarized here:
+
+Lake                      | Center Lake   | Five Island Lake | Ingham Lake    | Lost Island Lake     | Silver Lake (Dickinson County)     
+------------------------- | ------------- | ---------------- | -------------- | -------------------- | ---------------------------------
+Area (hectare)            | 89            | 390              | 150            | 470                  | 418
+Area ($m^2$)              | 890,308       | 3,901,170        | 1,497,337      | 4,702,447            | 4,176,356
+Watershed Area (acres)    | 296           | 3516             | 129            | 1838                 | 6890
+Wathershed:Lake Ratio     | 3.3:1         | 9.2:1            | 0.9:1          | 3.9:1                | 16.5:1
+Mean Depth ($m$)          | 2.9           | 1.5              | 1.9            | 3.1                  | 2
+Max Depth ($m$)           | 4.7           | 6.1              | 3.7            | 4.3                  | 3
+Row Crop Usage (hectare)  |               | 2657             | 55             |                      | 5876
+Percent Row Crop          |               | 75.6             | 42.2           |                      | 85.3
+Shoreline ($m$)           | 4,023         | 22,853           | 6,828          | 11,748               | 15,463
+Shoreline Complexity      | 1.20          | 3.26             | 1.57           | 1.53                 | 2.13
+
+- _Note that Center Lake TMDL reports are scheduled to begin in the next couple of years, and not all information is readily availble_
+
+
+## Water Quality Data
+
+Water quality data (summarized below) is available from ISU and Iowa DNR through an online database and the Limnology Laboratory at ISU and provided by Dr. Grace Wilkonson, EEOB. This is part of the Ambient Lake Monitoring Program that collects a suite of variables at 130 lakes in Iowa that are designated as "Principal Recreation Lakes" and data is available from 2000 to 2015, except in 2008. Further data (2016-2019) may also be available for inclusion toward the end of this project's timeframe. These lakes are visited 2-3 (almost always 3) times per year from spring to fall and in-situ measurements are taken as well as samples removed for laboratory analysis of biological and chemical components. 
+
+A Trophic State Index (TSI) can also be calculated from Chlorophyll _a_, Secchi Depth and Total Phosphorus. The index formulas were designed so that a difference of 10 units corresponds to a doubling of algal biomass. We chose to pick chlorophyll _a_ as a initial response variable, because the the developer of the index (Carlson 1977) said later in 1983 that averaging the three values was not appropriate, and chlorophyll _a_ was the best measurement to use out of the three. We do not expect the TSI to decrease out of the eutrophic range, but a directional shift in TSI may be indicative of the desired change in water quality from biomanipulation of carp and buffalo.
+
+Lakes fluctuate over time in cycles of stratification, turnover, zooplankton and algal blooms, etc. so these snapshots in time can be problematic. Still, we have identified a suite of variables that we expect to respond to the biomanipulation (harvest) of carp and buffalo. Also, these variables are common metrics used to designate water bodies as "degraded" or "healthy" and could provide insight into food web processes in the lake. The variables are summarized here:
+
+
+Variable                | Units            | Hypothesized short-term response 
+----------------------- | ---------------- | -------------------------------------------------------------------
+Secchi Depth            | meters           | Increase from carp removal, no difference from buffalo
+Total Suspened Solids   | $\mu g/L$        | Decrease from carp removal, no difference from buffalo 
+Dissolved Oxygen        | $mg/L$           | Decrease if large buffalo removal caused enough increase in zooplankton to reduce O2 production 
+                        |                  |
+Total Phosphorous       | $\mu g/L$        | Decrease with carp removal (resuspension)
+Total Nitrogen          | $mg/L$           | Decrease with carp removal (resuspension)
+                        |                  |
+Zooplankton Biomass     | $\mu g/L$        | Increase with buffalo removal (trophic release)
+Chlorophyll _a_         | $\mu g/L$        | Decrease with carp and buffalo removal
+Phytoplankton Biomass   | $mg/L$           | Decrease with both carp and buffalo removal (bottom up and top down pathways)
+_Cyanophyta_            | $mg/L$           | Decrease with carp and buffalo removal (nutrient shift and zoop shift)
+_Chlorophyta_           | $mg/L$           | Decrease with both carp and buffalo removal
+                        |                  |
+Trophic State Index     | Calculated from Chl _a_ | Decrease with both carp and buffalo removal; but not out of hyper-eurtrophic state.
+
+
+
+
+# Data Analysis
+
+- Predictor variable data comes from commercial harvest reports from 1997 to 2019 out of 5 Iowa Lakes
+- For background, we plot the distribution of harvest in total pounds removed (left) and pounds per acre removed (right). The number of bars across the box plots indicate the number of harvest dates in that year due to "stacking" multiple harvests within a year. The colors represent the different species. 
+- Clearly, effort expended and harvest success are highly variable through time.
+- Note the incentivized harvest in Lost Island Lake in 2010 and 2011. 
+- Also note non-incentivized contracts at Ingham 1999 & 2019 as well as Center 2016 approached the same biomass density removals as Lost Island Lake (400 lbs./acre).
+
+```{r, include = F}
+harvest.dat <- read.csv("harvestdata.csv", TRUE)
+summary(harvest.dat)
+head(harvest.dat)
+harvest.dat$Date <- as.Date(harvest.dat$Date, "%m/%d/%Y")
+harvest.dat$Year <- as.factor(harvest.dat$Year)
+harvest.dat$Month<-as.factor(harvest.dat$Month)
+harvest.dat$Modified.Year<-as.factor(harvest.dat$Modified.Year)
+colnames(harvest.dat)[1] <- c("Lake")
+
+#Removing High Lake
+harvest.dat<-droplevels(subset(harvest.dat, Lake != "High Lake"))
+
+harvest.dat<-droplevels(subset(harvest.dat, Lake != ""))
+harvest.dat$Lake<-as.character(harvest.dat$Lake)
+harvest.dat$Lake[harvest.dat$Lake == "center lake"] <- "Center Lake"
+harvest.dat$Lake[harvest.dat$Lake == "Silver Lake (Dickinson)"] <- "Silver Lake"
+harvest.dat$Lake<-as.factor(harvest.dat$Lake)
+levels(harvest.dat$Lake) # 5 lakes all good
+
+# Converting Pounds to Kilograms
+colnames(harvest.dat)[9] <- c("Kilograms")
+harvest.dat$Kilograms <- as.integer(harvest.dat$Kilograms)
+harvest.dat$Kilograms <- harvest.dat$Kilograms/2.205
+
+# setting acres
+harvest.dat$Hectares[harvest.dat$Lake == "Center Lake"] <- 89
+harvest.dat$Hectares[harvest.dat$Lake == "Five Island Lake"] <- 390
+harvest.dat$Hectares[harvest.dat$Lake == "Ingham Lake"] <- 150
+harvest.dat$Hectares[harvest.dat$Lake == "Lost Island Lake"] <- 470
+harvest.dat$Hectares[harvest.dat$Lake == "Silver Lake"] <- 418
+
+
+str(harvest.dat)
+
+# not sure about the last two columns before acres::
+harvest.dat<-harvest.dat[,-c(10,11)]
+
+
+# There's a period ( -> . <- ) in one cell in Kilogram column, making it a factor
+harvest.dat$Kilograms[harvest.dat$Kilograms == "."] <- 0
+harvest.dat$kilograms<-as.numeric(as.character(harvest.dat$Kilograms))
+summary(harvest.dat$Kilograms)
+
+
+###############################################
+#
+#    Predictor variable standardized by lake: pounds per acre; kg/ha
+#
+
+harvest.dat$Std.Removal.kg<-harvest.dat$Kilograms/harvest.dat$Hectares
+harvest.dat$Std.Removal.lb<-harvest.dat$Std.Removal.kg*1.12085 
+
+# Delete extraneous info: angler
+harvest.dat<-harvest.dat[,-c(2,3)]
+
+# Subsetting to only data from June 1999 onward (This is the 1999-2000 harvest season, before start of ALM water quality data)
+harvest.dat<-droplevels(subset(harvest.dat, Date >= "1999-06-01"))
+str(harvest.dat)
+```
+
+### Harvest through time
+```{r, warning = F, echo = F}
+
+a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
+            geom_bar(stat= "identity", colour = "black")+
+                labs(title = "Harvest in Kilograms through Time",
+                 x="Date",
+                 y="Kilograms Removed") +
+            facet_grid(Lake~.)+
+            scale_y_continuous(labels=comma)+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"),
+                  axis.text.y= element_text(angle=45),
+                  axis.text.x= element_text(angle=45))
+
+
+
+
+b <- ggplot(harvest.dat, aes(x=Year,y= Std.Removal.lbs, fill = Species))+
+            geom_bar(stat= "identity", colour = "black")+
+                labs(title = "Harvest in Kilograms per Acre through Time",
+                 x="Date",
+                 y="Kilograms per Acre Removed") +
+            facet_grid(Lake~.)+
+            scale_y_continuous(labels=comma)+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"),
+                  axis.text.y= element_text(angle=45),
+                  axis.text.x= element_text(angle=45))
+
+grid.arrange(a,b,ncol=2)
+```
+
+##Loading in Water Quality Data
+
+```{r, include = F}
+water.dat <- read.csv("waterdata.csv", TRUE)
+
+#removing the not-needed columns & renaming the needed columns
+
+water.dat <- water.dat[,-c(1,5,8,9,13,20,21)] # M Foli CHeck these two lines for accuracy please!
+colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops", "Chlorophyta", "Cyanophyta")
+
+#Removing High Lake from the dataset
+
+water.dat <- droplevels(subset(water.dat, Lake != "High Lake"))
+
+#Renaming Each Lake
+
+water.dat$Date <- as.Date(water.dat$Date, "%m/%d/%Y")
+water.dat<-droplevels(subset(water.dat, Lake != ""))
+water.dat$Lake <- as.character(water.dat$Lake)
+water.dat$Lake[water.dat$Lake == "(019) Center Lake (Dickinson ) "] <- "Center Lake"
+water.dat$Lake[water.dat$Lake == "(036) Five Island Lake (Palo Alto ) "] <- "Five Island Lake"
+water.dat$Lake[water.dat$Lake == "(048) Ingham Lake (Emmet ) "] <- "Ingham Lake"
+water.dat$Lake[water.dat$Lake == "(077) Lost Island Lake (Palo Alto ) "] <- "Lost Island Lake"
+water.dat$Lake[water.dat$Lake == "(105) Silver Lake (Dickinson) (Dickinson ) "] <- "Silver Lake"
+water.dat$Lake <- as.factor(water.dat$Lake)
+levels(water.dat$Lake)
+
+# Year as factor
+water.dat$Year<-as.factor(water.dat$Year)
+
+str(water.dat)
+```
+
+
+```{r, include = F}
+# Subsetting each Lake in the Water Quality data set, if needed later
+center.wq <- droplevels(subset(water.dat, water.dat$Lake == "Center Lake"))
+fiveisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Five Island Lake"))
+ingham.wq <- droplevels(subset(water.dat, water.dat$Lake == "Ingham Lake"))
+lostisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Lost Island Lake"))
+silver.wq <- droplevels(subset(water.dat, water.dat$Lake == "Silver Lake"))
+
+```
+
+### Distribution of water quality variables, for each Lake 
+
+```{r, include = F}
+#summary(water.dat)
+# first plot: TSS, Secchi, DO (so three columns, 6 rows)
+water.dat.m.a<-melt(water.dat[,c(1,5,10,14)])
+
+a<-ggplot(water.dat.m.a, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+a
+
+# Second plot: TP and TN (two columns, thre rows)
+water.dat.m.a<-melt(water.dat[,c(1,6,7)])
+
+b<-ggplot(water.dat.m.a, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+b
+
+# Third plot: Zoops, Cholorophyll, Phytoplankton, chlorophyta and cyanophyta
+water.dat.m.a<-melt(water.dat[,c(1,17,18,19,16,4)])
+
+c<-ggplot(water.dat.m.a, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))
+c
+
+
+```
+
+## Update 2/24/2020
+
+After meeting with Audrey and Phil, we have a new format for how to arrange the data. The general model format is:
+
+\[
+TSI \approx \beta_0 + L_i + (\beta_c * C_{li} * H_i) + (\beta_b * (1-C_{li}) * H_i)
+\]
+
+where i is indexed on year, lowercase $l$ is indexed on lake, uppercase $L$ is a fixed lake effect, $C$ is the proportion of harvest made up by carp, $1-C$ is the proportion of harvest made up by buffalo, $H$ is the total harvest. _In this example, TSI is used as response variable but any of the other 10 water quality variables may be used._
+
+Mesurements of TSI and other variables are taken from the June Ambient Lake Monitoring measurements. When a measurement from June is not available, we took the next closest measurement to within 365 days after the previous year's measurement date. 
+
+Completed Action Items:
+
+- Calculate TSI from Chl _a_ formula.
+
+- From those TSI values, calculate the _chanage_ in TSI from year A to year B. 
+
+- Apply same change in June measurement for other water quality variables between year A and year B.
+
+- Harvest data above began in 1999 to match water quality data; our data set starts in year "2000" which represents the commercial fish removal from September 1999 to May 2000. This is coupled with the water quality variable for June 2000, and so on.
+
+### New data frame:
+
+- _Lake:_ Name of each lake.
+
+- _Year:_ Year B for water quality response variables (represents the change in TSI, etc. between year A and B). For harvest data, this value is the total and proportional harvests amounts between years A and B (September A to April/May B). 
+
+- _Carp Harvest:_ The amount (pounds per acre) of carp harvested between years A and B.
+
+- _Buffalo Harvest:_ Same as immediately above, for buffalo.
+
+- _Total Removed:_ Per the model above, variable $H_i$.
+
+- _Proportion of Carp:_ Per the model above, the proportion (0 to 1) of the harvest made up of common carp, variable $C_{li}$.
+
+- _Proportion of Buffalo:_ Per the model above, and complement to previous bullet point, the proportion (0 to 1) of the harvest made up of bigmouth buffalo, variable $1-C_{li}$.
+
+- _Delta TSI Chl. a:_ Change in Trophic State Index calculated from Chlorophyll _a_. Each 10 unit increase represents a doubling of algal biomass. Lakes over 50 TSI have characteristics of eutrophic lakes. Represents June measurement in year B minus June measurement in Year A.
+
+- _Delta Chla, TSS, TN, TP, SD (Secchi Depth), Dissolved Oxygen, Turbidity, Phytoplankton biomass, Zooplankton biomass, Chlorophyta density, Cyanophyta density:_ Change in June (or closest) measurement of the variable from year A to B. For Year 2000, this represents the measurement in year 2000 minus the measurement in 1999.
+
+#### Loading in Yearly Change Dataset
+
+
+
+```{r, include = F, warning=F}
+yearchange.dat <- read.csv("Changesdata.csv", TRUE) 
+colnames(yearchange.dat)[1] <- c("Lake")
+
+
+#Setting Year as factor
+yearchange.dat$Year <- as.factor(yearchange.dat$Year)
+head(yearchange.dat)
+
+#Removing High Lake
+yearchange.dat<- droplevels(subset(yearchange.dat, Lake != "High Lake"))
+
+#Renaming Carp Lbs/Acre/year and Buffalo Lbs/Acre/Year to Kg/Hectare/Year
+colnames(yearchange.dat)[3] <- c("Carp Kg/Hectare/Year")
+colnames(yearchange.dat)[4] <- c("Buffalo Kg/Hectare/Year")
+
+#Converting from Lbs/Acre to kg/hectare
+yearchange.dat$`Carp Kg/Hectare/Year` <- yearchange.dat$`Carp Kg/Hectare/Year`/1.12085 
+yearchange.dat$`Buffalo Kg/Hectare/Year` <- yearchange.dat$`Buffalo Kg/Hectare/Year`/1.12085 
+
+#Renaming Total Removed H to Total Removed Kg (h)
+colnames(yearchange.dat)[5] <- c("Total Removed Kg (h)")
+
+#Total Removed Kg (h) = Total Carp Removed + Total Buffalo Removed
+
+yearchange.dat$`Total Removed Kg (h)` <- yearchange.dat$`Carp Kg/Hectare/Year`+ yearchange.dat$`Buffalo Kg/Hectare/Year`
+
+
+#Subsetting each lake for future use
+center.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Center Lake"))
+fiveisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Five Island Lake"))
+ingham.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Ingham Lake"))
+lostisland.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Lost Island Lake"))
+silver.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Silver Lake"))
+
+```
+
+#### Distribution of response variables: TSS, Secchi Depth, Dissolved Oxygen
+
+These represent the count (frequency) for each response variable along it's range. The function 'geom_density' from ggplot2 is a smoothed version of the histogram, useful for continuous random variables (shaded red area on figures, not always visible).
+
+```{r, include=F}
+#Plotting TSS, Secchi, DO
+
+change.dat.m.a<-melt(yearchange.dat[,c(1,10,13,14)]) # TSS col 10, Secchi col 13, 
+
+a<-ggplot(change.dat.m.a, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))+
+  labs(title="Distribution of Physical Response Variables")
+a
+
+#Plotting TN and TP
+
+change.dat.m.b<-melt(yearchange.dat[,c(1,8,9,11,12)]) # TN and TP
+
+b<-ggplot(change.dat.m.b, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))+
+  labs(title="Distribution of TSI and Nutrient Response Variables")
+b
+
+#Plotting TSI, Cholorophyll, Phytoplankton, Zoops, chlorophyta, and cyanophyta
+
+change.dat.m.c<-melt(yearchange.dat[,c(1,16,17,18,19)])
+
+c<-ggplot(change.dat.m.c, aes(x=value))+
+      geom_histogram(colour = "black", fill = "white")+
+      geom_density(alpha=.2, fill = "#FF6666")+
+            facet_grid(Lake~variable, scales = "free")+
+            theme(panel.grid.major = element_blank(), 
+                              panel.grid.minor = element_blank(),
+                              panel.background = element_rect(fill="white",colour="grey50"), 
+                              axis.line = element_line(colour = "black"),
+                              legend.position = "bottom",
+                              legend.title = element_blank(),
+                              legend.background = element_rect(colour="grey20"))+
+  labs(title="Distribution of Biotic Response Variables")
+c
+```
+
+```{r,warning=F, echo=F}
+suppressMessages(print(a))
+suppressMessages(print(b))
+suppressMessages(print(c))
+```
+
+
+
+
+
+### Pairs Plots
+
+From the package "ggAlly" this displays both the paired scatterplots and correlation coefficients of all pairs of data. Instead of displaying a 12x12 grid of 144 plots, we'll split them into Physical, Nutrient, and Biotic.
+
+```{r, echo = F, warning = F}
+# ggpairs(yearchange.dat[,8:19])
+# too many!
+
+ggpairs(yearchange.dat[,c(10,13,14)])
+ggpairs(yearchange.dat[,c(8,9,11,12)])
+ggpairs(yearchange.dat[,c(16,17,18,19)])
+```
