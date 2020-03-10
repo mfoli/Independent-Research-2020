@@ -385,3 +385,10 @@ ggpairs(yearchange.dat[,c(10,13,14)])
 ggpairs(yearchange.dat[,c(8,9,11,12)])
 ggpairs(yearchange.dat[,c(16,17,18,19)])
 ```
+
+
+```{r, include = F}
+#    write.csv(yearchange.dat,"YearChangeData_Metric.csv",row.names=F)
+#    write.csv(harvest.dat, "HarvestData_Metric.csv",row.names=F)
+```
+
