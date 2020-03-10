@@ -180,7 +180,7 @@ str(harvest.dat)
 ### Harvest through time
 ```{r, warning = F, echo = F}
 
-a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
+a <- ggplot(harvest.dat, aes(x=Year,y=Kilograms, fill = Species))+
             geom_bar(stat= "identity", colour = "black")+
                 labs(title = "Harvest in Kilograms through Time",
                  x="Date",
@@ -200,7 +200,7 @@ a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
 
 
 
-b <- ggplot(harvest.dat, aes(x=Year,y= Std.Removal.lbs, fill = Species))+
+b <- ggplot(harvest.dat, aes(x=Year,y=Std.Removal.kg, fill = Species))+
             geom_bar(stat= "identity", colour = "black")+
                 labs(title = "Harvest in Kilograms per Hectare through Time",
                  x="Date",
@@ -217,7 +217,7 @@ b <- ggplot(harvest.dat, aes(x=Year,y= Std.Removal.lbs, fill = Species))+
                   axis.text.y= element_text(angle=45),
                   axis.text.x= element_text(angle=45))
 
-grid.arrange(a,b,ncol=2)
+b
 ```
 
 ## Update 2/24/2020
@@ -252,7 +252,7 @@ Completed Action Items:
 
 - _Buffalo Harvest:_ Same as immediately above, for buffalo.
 
-- _Total Removed:_ Per the model above, variable $H_i$.
+- _Total Removed:_ Per the model above, variable $H_i$ (kilograms per hectare).
 
 - _Proportion of Carp:_ Per the model above, the proportion (0 to 1) of the harvest made up of common carp, variable $C_{li}$.
 
@@ -303,9 +303,9 @@ silver.yc <- droplevels(subset(yearchange.dat, yearchange.dat$Lake == "Silver La
 
 ```
 
-#### Distribution of response variables: TSS, Secchi Depth, Dissolved Oxygen
+#### Distribution of response variables
 
-These represent the count (frequency) for each response variable along it's range. The function 'geom_density' from ggplot2 is a smoothed version of the histogram, useful for continuous random variables (shaded red area on figures, not always visible).
+These represent the count (frequency distribution) for each response variable along its range. The function 'geom_density' from ggplot2 is a smoothed version of the histogram, useful for continuous random variables (shaded red area on figures, not always visible). Note that these are centered at around zero since we are examining the change in these variables from year to year
 
 ```{r, include=F}
 #Plotting TSS, Secchi, DO
@@ -373,9 +373,9 @@ suppressMessages(print(c))
 
 
 
-### Pairs Plots
+#### Pairs Plots - correlation of variables
 
-From the package "ggAlly" this displays both the paired scatterplots and correlation coefficients of all pairs of data. Instead of displaying a 12x12 grid of 144 plots, we'll split them into Physical, Nutrient, and Biotic.
+From the package "ggAlly" this displays both the paired scatterplots and correlation coefficients of all pairs of data. Instead of displaying a 12x12 grid of 144 plots, we'll split them into our three categories: Physical, Nutrient, and Biotic.
 
 ```{r, echo = F, warning = F}
 # ggpairs(yearchange.dat[,8:19])
