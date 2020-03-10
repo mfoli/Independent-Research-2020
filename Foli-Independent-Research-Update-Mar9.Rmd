@@ -62,18 +62,18 @@ __One final note on the study area:__ We can incorporate other lakes that fit ou
 
 We do not have abundance data for carp and buffalo for more than a couple of years in a subset of lakes. However, based on available data from the Spirit Lake District Fisheries Office, we have total pounds removed at multiple time points spanning 25 years in about a dozen lakes. We have identified a subset of these lakes based on similarity in geographic location, lake morphometry, fish communities, and regular harvest periods. Data is provided in total pounds removed, however due to differences in lake size and capacity to hold fish, we will standardize data by kilograms per hectare. The lakes are summarized here:
 
-Lake                      | Center Lake   | Five Island Lake | Ingham Lake    | Lost Island Lake     | Silver Lake (Dickinson County)     
-------------------------- | ------------- | ---------------- | -------------- | -------------------- | ---------------------------------
-Area (hectare)            | 89            | 390              | 150            | 470                  | 418
-Area ($m^2$)              | 890,308       | 3,901,170        | 1,497,337      | 4,702,447            | 4,176,356
-Watershed Area (acres)    | 296           | 3516             | 129            | 1838                 | 6890
-Wathershed:Lake Ratio     | 3.3:1         | 9.2:1            | 0.9:1          | 3.9:1                | 16.5:1
-Mean Depth ($m$)          | 2.9           | 1.5              | 1.9            | 3.1                  | 2
-Max Depth ($m$)           | 4.7           | 6.1              | 3.7            | 4.3                  | 3
-Row Crop Usage (hectare)  |               | 2657             | 55             |                      | 5876
-Percent Row Crop          |               | 75.6             | 42.2           |                      | 85.3
-Shoreline ($m$)           | 4,023         | 22,853           | 6,828          | 11,748               | 15,463
-Shoreline Complexity      | 1.20          | 3.26             | 1.57           | 1.53                 | 2.13
+Lake                        | Center Lake   | Five Island Lake | Ingham Lake    | Lost Island Lake     | Silver Lake (Dickinson County)     
+--------------------------- | ------------- | ---------------- | -------------- | ------------------- | --------------------------------
+Area (hectare)              | 89            | 390              | 150            | 470                  | 418
+Area ($m^2$)                | 890,308       | 3,901,170        | 1,497,337      | 4,702,447            | 4,176,356
+Watershed Area (hectare)    | 296           | 3516             | 129            | 1838                 | 6890
+Wathershed:Lake Ratio       | 3.3:1         | 9.2:1            | 0.9:1          | 3.9:1                | 16.5:1
+Mean Depth ($m$)            | 2.9           | 1.5              | 1.9            | 3.1                  | 2
+Max Depth ($m$)             | 4.7           | 6.1              | 3.7            | 4.3                  | 3
+Row Crop Usage (hectare)    |               | 2657             | 55             |                      | 5876
+Percent Row Crop            |               | 75.6             | 42.2           |                      | 85.3
+Shoreline ($m$)             | 4,023         | 22,853           | 6,828          | 11,748               | 15,463
+Shoreline Complexity        | 1.20          | 3.26             | 1.57           | 1.53                 | 2.13
 
 - _Note that Center Lake TMDL reports are scheduled to begin in the next couple of years, and not all information is readily availble_
 
@@ -113,12 +113,18 @@ Trophic State Index     | Calculated from Chl _a_ | Decrease with both carp and 
 - For background, we plot the distribution of harvest in total pounds removed (left) and pounds per acre removed (right). The number of bars across the box plots indicate the number of harvest dates in that year due to "stacking" multiple harvests within a year. The colors represent the different species. 
 - Clearly, effort expended and harvest success are highly variable through time.
 - Note the incentivized harvest in Lost Island Lake in 2010 and 2011. 
-- Also note non-incentivized contracts at Ingham 1999 & 2019 as well as Center 2016 approached the same biomass density removals as Lost Island Lake (400 lbs./acre).
+- Also note non-incentivized contracts at Ingham 1999 & 2019 as well as Center 2016 approached the same biomass density removals as Lost Island Lake (357 kg/hectare).
 
 ```{r, include = F}
 harvest.dat <- read.csv("harvestdata.csv", TRUE)
 summary(harvest.dat)
 head(harvest.dat)
+str(harvest.dat)
+
+# There's a period ( -> . <- ) in one cell in Kilogram column, making it a factor
+harvest.dat$Pounds[harvest.dat$Pounds == "."] <- 0
+harvest.dat$Pounds<-as.numeric(as.character(harvest.dat$Pounds))
+
 harvest.dat$Date <- as.Date(harvest.dat$Date, "%m/%d/%Y")
 harvest.dat$Year <- as.factor(harvest.dat$Year)
 harvest.dat$Month<-as.factor(harvest.dat$Month)
@@ -136,8 +142,9 @@ harvest.dat$Lake<-as.factor(harvest.dat$Lake)
 levels(harvest.dat$Lake) # 5 lakes all good
 
 # Converting Pounds to Kilograms
+summary(harvest.dat)
 colnames(harvest.dat)[9] <- c("Kilograms")
-harvest.dat$Kilograms <- as.integer(harvest.dat$Kilograms)
+#harvest.dat$Kilograms <- as.numeric(harvest.dat$Kilograms)
 harvest.dat$Kilograms <- harvest.dat$Kilograms/2.205
 
 # setting acres
@@ -154,15 +161,9 @@ str(harvest.dat)
 harvest.dat<-harvest.dat[,-c(10,11)]
 
 
-# There's a period ( -> . <- ) in one cell in Kilogram column, making it a factor
-harvest.dat$Kilograms[harvest.dat$Kilograms == "."] <- 0
-harvest.dat$kilograms<-as.numeric(as.character(harvest.dat$Kilograms))
-summary(harvest.dat$Kilograms)
-
-
 ###############################################
 #
-#    Predictor variable standardized by lake: pounds per acre; kg/ha
+#    Predictor variable standardized by lake: kg/ha; pounds per acre
 #
 
 harvest.dat$Std.Removal.kg<-harvest.dat$Kilograms/harvest.dat$Hectares
@@ -201,9 +202,9 @@ a <- ggplot(harvest.dat, aes(x=Year,y=Pounds, fill = Species))+
 
 b <- ggplot(harvest.dat, aes(x=Year,y= Std.Removal.lbs, fill = Species))+
             geom_bar(stat= "identity", colour = "black")+
-                labs(title = "Harvest in Kilograms per Acre through Time",
+                labs(title = "Harvest in Kilograms per Hectare through Time",
                  x="Date",
-                 y="Kilograms per Acre Removed") +
+                 y="Kilograms per Hectare Removed") +
             facet_grid(Lake~.)+
             scale_y_continuous(labels=comma)+
             theme(panel.grid.major = element_blank(), 
@@ -217,105 +218,6 @@ b <- ggplot(harvest.dat, aes(x=Year,y= Std.Removal.lbs, fill = Species))+
                   axis.text.x= element_text(angle=45))
 
 grid.arrange(a,b,ncol=2)
-```
-
-##Loading in Water Quality Data
-
-```{r, include = F}
-water.dat <- read.csv("waterdata.csv", TRUE)
-
-#removing the not-needed columns & renaming the needed columns
-
-water.dat <- water.dat[,-c(1,5,8,9,13,20,21)] # M Foli CHeck these two lines for accuracy please!
-colnames(water.dat) <- c("Lake","Date","Year", "Chlorophyll a", "TSS", "TN", "TP", "TP Reactive", "Depth", "Secchi Depth", "Averge Temp", "Average pH", "DO Saturation", "DO", "Turbidity", "Phyotplankton", "Zoops", "Chlorophyta", "Cyanophyta")
-
-#Removing High Lake from the dataset
-
-water.dat <- droplevels(subset(water.dat, Lake != "High Lake"))
-
-#Renaming Each Lake
-
-water.dat$Date <- as.Date(water.dat$Date, "%m/%d/%Y")
-water.dat<-droplevels(subset(water.dat, Lake != ""))
-water.dat$Lake <- as.character(water.dat$Lake)
-water.dat$Lake[water.dat$Lake == "(019) Center Lake (Dickinson ) "] <- "Center Lake"
-water.dat$Lake[water.dat$Lake == "(036) Five Island Lake (Palo Alto ) "] <- "Five Island Lake"
-water.dat$Lake[water.dat$Lake == "(048) Ingham Lake (Emmet ) "] <- "Ingham Lake"
-water.dat$Lake[water.dat$Lake == "(077) Lost Island Lake (Palo Alto ) "] <- "Lost Island Lake"
-water.dat$Lake[water.dat$Lake == "(105) Silver Lake (Dickinson) (Dickinson ) "] <- "Silver Lake"
-water.dat$Lake <- as.factor(water.dat$Lake)
-levels(water.dat$Lake)
-
-# Year as factor
-water.dat$Year<-as.factor(water.dat$Year)
-
-str(water.dat)
-```
-
-
-```{r, include = F}
-# Subsetting each Lake in the Water Quality data set, if needed later
-center.wq <- droplevels(subset(water.dat, water.dat$Lake == "Center Lake"))
-fiveisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Five Island Lake"))
-ingham.wq <- droplevels(subset(water.dat, water.dat$Lake == "Ingham Lake"))
-lostisland.wq <- droplevels(subset(water.dat, water.dat$Lake == "Lost Island Lake"))
-silver.wq <- droplevels(subset(water.dat, water.dat$Lake == "Silver Lake"))
-
-```
-
-### Distribution of water quality variables, for each Lake 
-
-```{r, include = F}
-#summary(water.dat)
-# first plot: TSS, Secchi, DO (so three columns, 6 rows)
-water.dat.m.a<-melt(water.dat[,c(1,5,10,14)])
-
-a<-ggplot(water.dat.m.a, aes(x=value))+
-      geom_histogram(colour = "black", fill = "white")+
-      geom_density(alpha=.2, fill = "#FF6666")+
-            facet_grid(Lake~variable, scales = "free")+
-            theme(panel.grid.major = element_blank(), 
-                              panel.grid.minor = element_blank(),
-                              panel.background = element_rect(fill="white",colour="grey50"), 
-                              axis.line = element_line(colour = "black"),
-                              legend.position = "bottom",
-                              legend.title = element_blank(),
-                              legend.background = element_rect(colour="grey20"))
-a
-
-# Second plot: TP and TN (two columns, thre rows)
-water.dat.m.a<-melt(water.dat[,c(1,6,7)])
-
-b<-ggplot(water.dat.m.a, aes(x=value))+
-      geom_histogram(colour = "black", fill = "white")+
-      geom_density(alpha=.2, fill = "#FF6666")+
-            facet_grid(Lake~variable, scales = "free")+
-            theme(panel.grid.major = element_blank(), 
-                              panel.grid.minor = element_blank(),
-                              panel.background = element_rect(fill="white",colour="grey50"), 
-                              axis.line = element_line(colour = "black"),
-                              legend.position = "bottom",
-                              legend.title = element_blank(),
-                              legend.background = element_rect(colour="grey20"))
-b
-
-# Third plot: Zoops, Cholorophyll, Phytoplankton, chlorophyta and cyanophyta
-water.dat.m.a<-melt(water.dat[,c(1,17,18,19,16,4)])
-
-c<-ggplot(water.dat.m.a, aes(x=value))+
-      geom_histogram(colour = "black", fill = "white")+
-      geom_density(alpha=.2, fill = "#FF6666")+
-            facet_grid(Lake~variable, scales = "free")+
-            theme(panel.grid.major = element_blank(), 
-                              panel.grid.minor = element_blank(),
-                              panel.background = element_rect(fill="white",colour="grey50"), 
-                              axis.line = element_line(colour = "black"),
-                              legend.position = "bottom",
-                              legend.title = element_blank(),
-                              legend.background = element_rect(colour="grey20"))
-c
-
-
 ```
 
 ## Update 2/24/2020
@@ -346,7 +248,7 @@ Completed Action Items:
 
 - _Year:_ Year B for water quality response variables (represents the change in TSI, etc. between year A and B). For harvest data, this value is the total and proportional harvests amounts between years A and B (September A to April/May B). 
 
-- _Carp Harvest:_ The amount (pounds per acre) of carp harvested between years A and B.
+- _Carp Harvest:_ The amount (kilograms per hectare) of carp harvested between years A and B.
 
 - _Buffalo Harvest:_ Same as immediately above, for buffalo.
 
