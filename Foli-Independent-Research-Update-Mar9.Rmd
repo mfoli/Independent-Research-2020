@@ -278,7 +278,7 @@ yearchange.dat$Year <- as.factor(yearchange.dat$Year)
 head(yearchange.dat)
 
 #Removing High Lake
-yearchange.dat<- droplevels(subset(yearchange.dat, Lake != "High Lake"))
+#yearchange.dat<- droplevels(subset(yearchange.dat, Lake != "High Lake"))
 
 #Renaming Carp Lbs/Acre/year and Buffalo Lbs/Acre/Year to Kg/Hectare/Year
 colnames(yearchange.dat)[3] <- c("Carp Kg/Hectare/Year")

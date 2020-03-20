@@ -1,6 +1,4 @@
-Lake,Year,Carp Kg/Hectare/Year,Buffalo Kg/Hectare/Year,Total Removed Kg (h),Proportion.of.Carp,Proportion.of.Buffalo,Delta.TSI..Chla.,Delta.Chla,Delta.TSS,Delta.TN,Delta.TP,Delta.SD,Delta.DO,Delta.Turbidity,Delta.Phytoplankton.Total.Biomass,Delta.Zooplankton.Total.Biomass,Delta.Chlorophyta,Delta.Cyanophyta
-Center Lake,1999,0,0,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
-Center Lake,2000,0,0,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+﻿Lake,Year,Carp Kg/Hectare/Year,Buffalo Kg/Hectare/Year,Total Removed Kg (h),Proportion.of.Carp,Proportion.of.Buffalo,Delta.TSI..Chla.,Delta.Chla,Delta.TSS,Delta.TN,Delta.TP,Delta.SD,Delta.DO,Delta.Turbidity,Delta.Phytoplankton.Total.Biomass,Delta.Zooplankton.Total.Biomass,Delta.Chlorophyta,Delta.Cyanophyta
 Center Lake,2001,0,0,0,NA,NA,5.424935384,-1.333333333,7.666666667,-0.206666667,-113.3333333,-1.4,-1.033333333,-9.666666667,15.13202333,-242.153921,0.117816667,15.06982
 Center Lake,2002,0,0,0,NA,NA,-16.79194143,20.9,-5.333333333,0.056666667,23.33333333,1.45,0.9,13.66666667,-223.7392033,-112.569041,-0.482833333,-221.7708133
 Center Lake,2003,0,0,0,NA,NA,6.964651672,16.53333333,0,-0.06,18.66666667,-1.45,-1.6,-3,211.03969,148.8326983,0.478033333,208.87787
