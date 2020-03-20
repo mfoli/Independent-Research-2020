@@ -1,9 +1,11 @@
 ---
 title: "Commercial Fish Harvest ~ Water Quality"
-subtitle: "Shallow Natural Lakes of Northwest Iowa"
 author: "Matthew Foli & Martin Simonson"
-output: pdf_document
-editor_options: 
+output:
+  word_document: default
+  pdf_document: default
+subtitle: Shallow Natural Lakes of Northwest Iowa
+editor_options:
   chunk_output_type: console
 ---
 
