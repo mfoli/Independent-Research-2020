@@ -1,0 +1,157 @@
+install.packages("ggResidpanel")
+install.packages("emmeans")
+library(ggplot2)
+library(ggResidpanel)
+library(car)
+library(emmeans)
+
+alldat <- read.csv("YearChange_MetricA.csv", header = T)
+names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha", 
+                   "prop_carp", "prop_buff", "delta_tsi", "delta_tsi_chla", "delta_chla",
+                   "delta_tss", "delta_tn", "delta_tp", "delta_sd", "delta_do", 
+                   "detlat_turbid", "delta_total_phyto", "delta_total_zoo",
+                   "delta_chloro", "delta_cyano")
+alldat <- alldat[complete.cases(alldat),]
+alldat$year_fac <- as.factor(alldat$year)
+alldat$year_cent <- alldat$year - min(alldat$year)
+
+ggplot(data = alldat, aes(x = year, y = delta_tn, color = lake)) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in TN over time (data values)",
+       x = "year",
+       y = "change in TN")
+
+summary(alldat$carp_kg_ha)
+summary(alldat$buffalo_kg_ha)
+
+# Model change in TN based on lake, year and species
+
+ggplot(data = alldat, aes(x = delta_tn)) + geom_histogram(binwidth = 1)
+summary(alldat$delta_tn)
+
+mod1 <- lm(delta_tn ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+resid_panel(mod1)
+Anova(mod1, type = 3)
+summary(mod1)
+
+# Analysis
+
+  # Look just at lakes, averaging over year and fish harvest
+emm_lake <- emmeans(mod1, specs = "lake")
+emm_lake #These are the estimated delta-TN for each lake, at the mean values of buffalo and carp harvest
+
+  # Look just at sp harvest per lake, averaging over year and other sp harvest
+summary(alldat$carp_kg_ha)
+summary(alldat$buffalo_kg_ha)
+
+refgrid_carp <- ref_grid(mod1,
+                 at = list(carp_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
+carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
+head(carp_df)
+
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+  geom_line() +
+  xlab("carp harvest (kg/ha)") + ylab("change in TN") +
+  ggtitle("Estimated change in TN vs. carp harvest")
+
+
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+  geom_line() +
+  labs(title = "Estimated change in TN vs. carp harvest",
+       subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
+       x = "carp harvest (kg/ha)",
+       y = "change in TN")
+  
+
+refgrid_buf <- ref_grid(mod1, 
+                         at = list(buffalo_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
+
+buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
+head(buff_df)
+
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+  xlab("buffalo harvest (kg/ha)") + ylab("change in TN") +
+  ggtitle("Estimated change in TN vs. buffalo harvest")
+
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+  geom_line() +
+  labs(title = "Estimated change in TN vs. buffalo harvest",
+       subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
+       x = "buffalo harvest (kg/ha)",
+       y = "change in TN")
+
+
+
+# Plots
+
+  # Plot the data
+ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tn)) +
+  geom_line(color = "darkgreen") +
+  geom_line(aes(x = carp_kg_ha, y = delta_tn), color = "darkblue") +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Harvest vs. Change in TN (data values, averaged over all lakes in all years)", 
+       subtitle = "green = buffalo, blue = carp",
+       x = "harvest (kg/ha)", y = "change in TN")
+
+ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tn)) +
+  geom_line(color = "darkgreen") +
+  geom_line(aes(x = carp_kg_ha, y = delta_tn), color = "darkblue") +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  facet_wrap( ~ lake) +
+  labs(title = "Harvest vs. Change in TN (data values averaged over all years)", 
+       subtitle = "green = buffalo, blue = carp",
+       x = "harvest (kg/ha)", y = "change in TN")
+
+  # Plot the model estimates
+refgrid_all <- ref_grid(mod1, cov.keep = "lake",
+                        at = list(buffalo_kg_ha = seq(0,150, by = 25), 
+                                  carp_kg_ha = seq(0,150, by = 25)))
+
+
+model_df <- as.data.frame(summary(refgrid_all, infer = c(T,T)))
+head(model_df)
+
+  # Interaction plots
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha) +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in TN",
+       color = "carp harvest (kg/ha)")
+
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in TN",
+       color = "carp harvest (kg/ha)")
+
+ggplot(model_df,
+       aes(x = factor(buffalo_kg_ha), y = prediction, color = factor(carp_kg_ha))) +
+  geom_point() + facet_wrap(~ lake) +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in TN",
+       color = "carp harvest (kg/ha)")
+
+ggplot(model_df,
+       aes(x = as.factor(buffalo_kg_ha), y = as.factor(carp_kg_ha), fill = prediction)) +
+  geom_tile() +
+  scale_fill_gradient2(low="darkblue", mid="grey50", high="brown", midpoint=0) +
+  labs(title = "Modeled effect on TN from fish harvest",
+       x = "buffalo harvest (kg/ha)",
+       y = "carp harvest (kg/ha)",
+       fill = "Change in TN")
+
+ggplot(model_df,
+       aes(x = as.factor(buffalo_kg_ha), y = as.factor(carp_kg_ha), fill = prediction)) +
+  geom_tile() +
+  scale_fill_gradient2(low="darkblue", mid="grey50", high="brown", midpoint=0) +
+  facet_wrap(~lake) +
+  labs(title = "Modeled effect on TN from fish harvest",
+       x = "buffalo harvest (kg/ha)",
+       y = "carp harvest (kg/ha)",
+       fill = "Change in TN")
+       
