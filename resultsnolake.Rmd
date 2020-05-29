@@ -29,7 +29,7 @@ alldat$year_cent <- alldat$year - min(alldat$year)
 #Looking At Change in TSI
 
 ```{r}
-ggplot(data = alldat, aes(x = year, y = delta_tsi, color = lake)) + geom_line() +
+ggplot(data = alldat, aes(x = year, y = delta_tsi, )) + geom_line() +
   geom_hline(yintercept = 0, linetype = "dotted") +
   labs(title = "Change in TSI over time (data values)",
        x = "year",
@@ -45,7 +45,7 @@ summary(alldat$buffalo_kg_ha)
 ggplot(data = alldat, aes(x = delta_tsi)) + geom_histogram(binwidth = 1)
 summary(alldat$delta_tsi)
 
-tsimod <- lm(delta_tsi ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+tsimod <- lm(delta_tsi ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tsimod)
 Anova(tsimod, type = 3)
 summary(tsimod)
@@ -53,10 +53,10 @@ summary(tsimod)
 ```
 
 # Analysis
-# Look just at lakes, averaging over year and fish harvest
+# Look just at year centered, averaging over year and fish harvest
 
 ```{r}
-emm_lake <- emmeans(tsimod, specs = "lake")
+emm_lake <- emmeans(tsimod, specs = "year_cent")
 emm_lake #These are the estimated delta-tsi for each lake, at the mean values of buffalo and carp harvest
 
 # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -68,13 +68,13 @@ refgrid_carp <- ref_grid(tsimod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in TSI") +
   ggtitle("Estimated change in TSI vs. carp harvest")
 
-tsi.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tsi.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -89,17 +89,18 @@ refgrid_buf <- ref_grid(tsimod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in TSI") +
   ggtitle("Estimated change in TSI vs. buffalo harvest")
 
-tsi.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tsi.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
        x = "",
        y = "")
+
 tsi.buffharvest
 
 ```
@@ -174,7 +175,7 @@ ggplot(model_df,
 
 #Looking at Change in Chlorophyll a (137-241)     
 ```{r}
-chlamod <- lm(delta_chla ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+chlamod <- lm(delta_chla ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(chlamod)
 Anova(chlamod, type = 3)
 summary(chlamod)
@@ -182,7 +183,7 @@ summary(chlamod)
 # Analysis
 
 #Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(chlamod, specs = "lake")
+emm_lake <- emmeans(chlamod, specs = "year_cent")
 emm_lake #These are the estimated delta-tsi for each lake, at the mean values of buffalo and carp harvest
 
 #Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -194,14 +195,14 @@ refgrid_carp <- ref_grid(chlamod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in chl a") +
   ggtitle("Estimated change in chl a vs. carp harvest")
 
 
-chla.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+chla.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -216,12 +217,12 @@ refgrid_buf <- ref_grid(chlamod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in chla") +
   ggtitle("Estimated change in chla vs. buffalo harvest")
 
-chla.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+chla.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -301,7 +302,7 @@ ggplot(model_df,
 
 #Looking at Change in Chlorophyta (243-346)
 ```{r}
-chloromod <- lm(delta_chloro ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+chloromod <- lm(delta_chloro ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(chloromod)
 Anova(chloromod, type = 3)
 summary(chloromod)
@@ -309,7 +310,7 @@ summary(chloromod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(chloromod, specs = "lake")
+emm_lake <- emmeans(chloromod, specs = "year_cent")
 emm_lake #These are the estimated delta-Chlorophyta for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -321,14 +322,14 @@ refgrid_carp <- ref_grid(chloromod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in Chlorophyta") +
   ggtitle("Estimated change in Chlorophyta vs. carp harvest")
 
 
-chloro.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+chloro.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -342,12 +343,12 @@ refgrid_buf <- ref_grid(chloromod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in Chlorophyta") +
   ggtitle("Estimated change in Chlorophyta vs. buffalo harvest")
 
-chloro.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+chloro.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -426,7 +427,7 @@ ggplot(model_df,
 #Looking at Change in Cyanophyta (348-452)
 
 ```{r}
-cyanomod <- lm(delta_cyano ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+cyanomod <- lm(delta_cyano ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(cyanomod)
 Anova(cyanomod, type = 3)
 summary(cyanomod)
@@ -434,7 +435,7 @@ summary(cyanomod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(cyanomod, specs = "lake")
+emm_lake <- emmeans(cyanomod, specs = "year_cent")
 emm_lake #These are the estimated delta-Cyanophyta for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -446,14 +447,14 @@ refgrid_carp <- ref_grid(cyanomod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in Cyanophyta") +
   ggtitle("Estimated change in Cyanophyta vs. carp harvest")
 
 
-cyano.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+cyano.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -467,12 +468,12 @@ refgrid_buf <- ref_grid(cyanomod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in Cyanophyta") +
   ggtitle("Estimated change in Cyanophyta vs. buffalo harvest")
 
-cyano.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+cyano.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -551,7 +552,7 @@ ggplot(model_df,
 #Looking at change in Secchi Depth (454-559)
 
 ```{r}
-sdmod <- lm(delta_sd ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+sdmod <- lm(delta_sd ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(sdmod)
 Anova(sdmod, type = 3)
 summary(sdmod)
@@ -559,7 +560,7 @@ summary(sdmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(sdmod, specs = "lake")
+emm_lake <- emmeans(sdmod, specs = "year_cent")
 emm_lake #These are the estimated delta-SD for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -571,14 +572,14 @@ refgrid_carp <- ref_grid(sdmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in SD") +
   ggtitle("Estimated change in SD vs. carp harvest")
 
 
-sd.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+sd.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -593,12 +594,12 @@ refgrid_buf <- ref_grid(sdmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in SD") +
   ggtitle("Estimated change in SD vs. buffalo harvest")
 
-sd.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+sd.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -679,7 +680,7 @@ ggplot(model_df,
 #Looking at Changes in Total Nitrogen (561-667)
 ```{r}
 
-tnmod <- lm(delta_tn ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+tnmod <- lm(delta_tn ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tnmod)
 Anova(tnmod, type = 3)
 summary(tnmod)
@@ -687,7 +688,7 @@ summary(tnmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(tnmod, specs = "lake")
+emm_lake <- emmeans(tnmod, specs = "year_cent")
 emm_lake #These are the estimated delta-TN for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -699,14 +700,14 @@ refgrid_carp <- ref_grid(tnmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in TN") +
   ggtitle("Estimated change in TN vs. carp harvest")
 
 
-tn.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tn.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -720,12 +721,12 @@ refgrid_buf <- ref_grid(tnmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in TN") +
   ggtitle("Estimated change in TN vs. buffalo harvest")
 
-tn.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tn.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -807,7 +808,7 @@ ggplot(model_df,
 #Looking at Change in Total Phosphorous (669-773)
 
 ```{r}
-tpmod <- lm(delta_tp ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+tpmod <- lm(delta_tp ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tpmod)
 Anova(tpmod, type = 3)
 summary(tpmod)
@@ -815,7 +816,7 @@ summary(tpmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(tpmod, specs = "lake")
+emm_lake <- emmeans(tpmod, specs = "year_cent")
 emm_lake #These are the estimated delta-TP for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -827,14 +828,14 @@ refgrid_carp <- ref_grid(tpmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in TP") +
   ggtitle("Estimated change in TP vs. carp harvest")
 
 
-tp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -849,12 +850,12 @@ refgrid_buf <- ref_grid(tpmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in TP") +
   ggtitle("Estimated change in TP vs. buffalo harvest")
 
-tp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -937,7 +938,7 @@ ggplot(model_df,
 
 ```{r}
 
-tssmod <- lm(delta_tss ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+tssmod <- lm(delta_tss ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tssmod)
 Anova(tssmod, type = 3)
 summary(tssmod)
@@ -945,7 +946,7 @@ summary(tssmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(tssmod, specs = "lake")
+emm_lake <- emmeans(tssmod, specs = "year_cent")
 emm_lake #These are the estimated delta-TSS for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -957,14 +958,14 @@ refgrid_carp <- ref_grid(tssmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in TSS") +
   ggtitle("Estimated change in TSS vs. carp harvest")
 
 
-tss.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tss.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -980,12 +981,12 @@ refgrid_buf <- ref_grid(tssmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in TSS") +
   ggtitle("Estimated change in TSS vs. buffalo harvest")
 
-tss.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tss.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1064,7 +1065,7 @@ ggplot(model_df,
 #Looking at Change in Total Phytoplankton (880-985)
 ```{r}
 
-tppmod <- lm(delta_total_phyto ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+tppmod <- lm(delta_total_phyto ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tppmod)
 Anova(tppmod, type = 3)
 summary(tppmod)
@@ -1072,7 +1073,7 @@ summary(tppmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(tppmod, specs = "lake")
+emm_lake <- emmeans(tppmod, specs = "year_cent")
 emm_lake #These are the estimated delta-Total Phytoplankton for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -1084,14 +1085,14 @@ refgrid_carp <- ref_grid(tppmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in Total Phytoplankton") +
   ggtitle("Estimated change in Total Phytoplankton vs. carp harvest")
 
 
-tpp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tpp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1105,12 +1106,12 @@ refgrid_buf <- ref_grid(tppmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in Total Phytoplankton") +
   ggtitle("Estimated change in Total Phytoplankton vs. buffalo harvest")
 
-tpp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tpp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1193,7 +1194,7 @@ ggplot(model_df,
 
 ```{r}
 
-tzpmod <- lm(delta_total_zoo ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+tzpmod <- lm(delta_total_zoo ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tzpmod)
 Anova(tzpmod, type = 3)
 summary(tzpmod)
@@ -1201,7 +1202,7 @@ summary(tzpmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(tzpmod, specs = "lake")
+emm_lake <- emmeans(tzpmod, specs = "year_cent")
 emm_lake #These are the estimated delta-Total Zooplankton for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -1213,14 +1214,14 @@ refgrid_carp <- ref_grid(tzpmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in Total Zooplankton") +
   ggtitle("Estimated change in Total Zooplankton vs. carp harvest")
 
 
-tzp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tzp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1234,12 +1235,12 @@ refgrid_buf <- ref_grid(tzpmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in Total Zooplankton") +
   ggtitle("Estimated change in Total Zooplankton vs. buffalo harvest")
 
-tzp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+tzp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1318,7 +1319,7 @@ ggplot(model_df,
 #Looking at Change in Turbidity (1092-1195)
 
 ```{r}
-turbmod <- lm(delta_turbid ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
+turbmod <- lm(delta_turbid ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(turbmod)
 Anova(turbmod, type = 3)
 summary(turbmod)
@@ -1326,7 +1327,7 @@ summary(turbmod)
 # Analysis
 
   # Look just at lakes, averaging over year and fish harvest
-emm_lake <- emmeans(turbmod, specs = "lake")
+emm_lake <- emmeans(turbmod, specs = "year_cent")
 emm_lake #These are the estimated delta-Turbidity for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
@@ -1338,14 +1339,14 @@ refgrid_carp <- ref_grid(turbmod,
 carp_df <- as.data.frame(summary(refgrid_carp, infer = c(T,T)))
 head(carp_df)
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
   geom_line() +
   xlab("carp harvest (kg/ha)") + ylab("change in Turbidity") +
   ggtitle("Estimated change in Turbidity vs. carp harvest")
 
 
-turb.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+turb.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1360,12 +1361,12 @@ refgrid_buf <- ref_grid(turbmod,
 buff_df <- as.data.frame(summary(refgrid_buf, infer = c(T,T)))
 head(buff_df)
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + geom_line() +
+ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + geom_line() +
   xlab("buffalo harvest (kg/ha)") + ylab("change in Turbidity") +
   ggtitle("Estimated change in Turbidity vs. buffalo harvest")
 
-turb.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
-  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
+turb.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction)) + 
+  geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),alpha=0.2) +
   geom_line() +
   labs(title = "",
        subtitle = "", 
@@ -1447,27 +1448,21 @@ ggplot(model_df,
 ```{r}
 #Nutrients + TS
 #pulls legend from plot
-g_legend<-function(a.gplot){
-  tmp <- ggplot_gtable(ggplot_build(a.gplot))
-  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
-  legend <- tmp$grobs[[leg]]
-  return(legend)}
 
-mylegend<-g_legend(tsi.carpharvest)
 
 Nharvest <-grid.arrange(tsi.carpharvest + theme(legend.position = "none"), tsi.buffharvest + theme(legend.position = "none"),
                         chla.carpharvest + theme(legend.position = "none"), chla.buffharvest + theme(legend.position = "none"),
                         tn.carpharvest + theme(legend.position = "none"), tn.buffharvest + theme(legend.position = "none"),
-                        tp.carpharvest + theme(legend.position = "none"), tp.buffharvest+ theme(legend.position = "none"), ncol=2, mylegend)
+                        tp.carpharvest + theme(legend.position = "none"), tp.buffharvest+ theme(legend.position = "none"), ncol=2)
 
 Nharvest
 
 
 #Biomass
-grid.arrange(tpp.carpharvest + theme(legend.position = "none"), tpp.buffharvest + theme(legend.position = "none"), tzp.carpharvest + theme(legend.position = "none"), tzp.buffharvest + theme(legend.position = "none"), chloro.carpharvest + theme(legend.position = "none"), chloro.buffharvest + theme(legend.position = "none"), cyano.carpharvest + theme(legend.position = "none"), cyano.buffharvest + theme(legend.position = "none"), ncol=2, mylegend)
+grid.arrange(tpp.carpharvest + theme(legend.position = "none"), tpp.buffharvest + theme(legend.position = "none"), tzp.carpharvest + theme(legend.position = "none"), tzp.buffharvest + theme(legend.position = "none"), chloro.carpharvest + theme(legend.position = "none"), chloro.buffharvest + theme(legend.position = "none"), cyano.carpharvest + theme(legend.position = "none"), cyano.buffharvest + theme(legend.position = "none"), ncol=2)
 
 #Physical
-grid.arrange(sd.carpharvest + theme(legend.position = "none"), sd.buffharvest + theme(legend.position = "none"), tss.carpharvest + theme(legend.position = "none"), tss.buffharvest + theme(legend.position = "none"), turb.carpharvest + theme(legend.position = "none"), turb.buffharvest + theme(legend.position = "none"), ncol=2, mylegend)
+grid.arrange(sd.carpharvest + theme(legend.position = "none"), sd.buffharvest + theme(legend.position = "none"), tss.carpharvest + theme(legend.position = "none"), tss.buffharvest + theme(legend.position = "none"), turb.carpharvest + theme(legend.position = "none"), turb.buffharvest + theme(legend.position = "none"), ncol=2)
 ```      
 
 #Combining change in variable due to harvest plots
