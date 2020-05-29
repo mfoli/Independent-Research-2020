@@ -1,11 +1,12 @@
----
-chunk_output_type: console
----
+install.packages("ggpubr")
 library(ggplot2)
 library(ggResidpanel)
 library(car)
 library(emmeans)
 library(gridExtra)
+library(grid)
+library(gtable)
+library(ggpubr)
 
 ```{r}
 
@@ -1424,13 +1425,28 @@ ggplot(model_df,
 #Combined Figures For Average Change of Value for Buffalo and Carp Density
 #Starting with Nutrients and TSI
 ```{r}
-#Nutrients + TSI
+#Nutrients + TS
+#pulls legend from plot
+g_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
 
-grid.arrange(tsi.carpharvest, tsi.buffharvest, chla.carpharvest, chla.buffharvest, tn.carpharvest, tn.buffharvest, tp.carpharvest, tp.buffharvest, ncol=2)
+mylegend<-g_legend(tsi.carpharvest)
+
+Nharvest <-grid.arrange(tsi.carpharvest + theme(legend.position = "none"), tsi.buffharvest + theme(legend.position = "none"),
+                        chla.carpharvest + theme(legend.position = "none"), chla.buffharvest + theme(legend.position = "none"),
+                        tn.carpharvest + theme(legend.position = "none"), tn.buffharvest + theme(legend.position = "none"),
+                        tp.carpharvest + theme(legend.position = "none"), tp.buffharvest+ theme(legend.position = "none"), ncol=2, mylegend)
+
+annotate_
+Nharvest
+
 
 #Biomass
 grid.arrange(tpp.carpharvest, tpp.buffharvest, tzp.carpharvest, tzp.buffharvest, chloro.carpharvest, chloro.buffharvest, cyano.carpharvest, cyano.buffharvest, ncol=2)
 
 #Physical
 grid.arrange(sd.carpharvest, sd.buffharvest, tss.carpharvest, tss.buffharvest, turb.carpharvest, turb.buffharvest, ncol=2)
-       
+```      
