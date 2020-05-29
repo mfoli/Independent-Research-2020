@@ -1,7 +1,13 @@
+---
+chunk_output_type: console
+---
 library(ggplot2)
 library(ggResidpanel)
 library(car)
 library(emmeans)
+library(gridExtra)
+
+```{r}
 
 alldat <- read.csv("YearChange_MetricA.csv", header = T)
 names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha", 
@@ -9,12 +15,14 @@ names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha",
                    "delta_tss", "delta_tn", "delta_tp", "delta_sd", "delta_do", 
                    "detlat_turbid", "delta_total_phyto", "delta_total_zoo",
                    "delta_chloro", "delta_cyano")
-alldat <- alldat
 alldat$year_fac <- as.factor(alldat$year)
 alldat$year_cent <- alldat$year - min(alldat$year)
 
+```
+
 #Looking At Change in TSI
 
+```{r}
 ggplot(data = alldat, aes(x = year, y = delta_tsi, color = lake)) + geom_line() +
   geom_hline(yintercept = 0, linetype = "dotted") +
   labs(title = "Change in TSI over time (data values)",
@@ -23,10 +31,11 @@ ggplot(data = alldat, aes(x = year, y = delta_tsi, color = lake)) + geom_line() 
 
 summary(alldat$carp_kg_ha)
 summary(alldat$buffalo_kg_ha)
-
+```
 
 # Model change in TSI based on lake, year and species
 
+```{r}
 ggplot(data = alldat, aes(x = delta_tsi)) + geom_histogram(binwidth = 1)
 summary(alldat$delta_tsi)
 
@@ -35,13 +44,16 @@ resid_panel(tsimod)
 Anova(tsimod, type = 3)
 summary(tsimod)
 
-# Analysis
+```
 
-  # Look just at lakes, averaging over year and fish harvest
+# Analysis
+# Look just at lakes, averaging over year and fish harvest
+
+```{r}
 emm_lake <- emmeans(tsimod, specs = "lake")
 emm_lake #These are the estimated delta-tsi for each lake, at the mean values of buffalo and carp harvest
 
-  # Look just at sp harvest per lake, averaging over year and other sp harvest
+# Look just at sp harvest per lake, averaging over year and other sp harvest
 summary(alldat$carp_kg_ha)
 summary(alldat$buffalo_kg_ha)
 
@@ -55,14 +67,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   xlab("carp harvest (kg/ha)") + ylab("change in TSI") +
   ggtitle("Estimated change in TSI vs. carp harvest")
 
-
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+tsi.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TSI vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in TSI")
+tsi.carpharvest
   
 
 refgrid_buf <- ref_grid(tsimod, 
@@ -75,19 +87,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in TSI") +
   ggtitle("Estimated change in TSI vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+tsi.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TSI vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in TSI")
+tsi.buffharvest
 
-
+```
 
 # Plots
+# Plot the data
+```{r}
 
-  # Plot the data
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tsi)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_tsi), color = "darkblue") +
@@ -113,8 +127,22 @@ refgrid_all <- ref_grid(tsimod, cov.keep = "lake",
 
 model_df <- as.data.frame(summary(refgrid_all, infer = c(T,T)))
 head(model_df)
+```
 
-#Interaction Plots have been removed for this script
+#Interaction Plots
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in TSI",
+       color = "carp harvest (kg/ha)")
+
+```
+
+#Heat maps
+```{r}
 
 ggplot(model_df,
        aes(x = as.factor(buffalo_kg_ha), y = as.factor(carp_kg_ha), fill = prediction)) +
@@ -134,9 +162,10 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in TSI")
+```
 
 #Looking at Change in Chlorophyll a (137-241)     
-
+```{r}
 chlamod <- lm(delta_chla ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(chlamod)
 Anova(chlamod, type = 3)
@@ -144,11 +173,11 @@ summary(chlamod)
 
 # Analysis
 
-  # Look just at lakes, averaging over year and fish harvest
+#Look just at lakes, averaging over year and fish harvest
 emm_lake <- emmeans(chlamod, specs = "lake")
 emm_lake #These are the estimated delta-tsi for each lake, at the mean values of buffalo and carp harvest
 
-  # Look just at sp harvest per lake, averaging over year and other sp harvest
+#Look just at sp harvest per lake, averaging over year and other sp harvest
 summary(alldat$carp_kg_ha)
 summary(alldat$buffalo_kg_ha)
 
@@ -163,13 +192,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in chl a vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+chla.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in chl a vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in chl a")
+chla.carpharvest
   
 
 refgrid_buf <- ref_grid(chlamod, 
@@ -182,19 +212,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in chla") +
   ggtitle("Estimated change in chla vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+chla.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in chla vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in chla")
+chla.buffharvest
 
+```
 
 
 # Plots
-
-  # Plot the data
+# Plot the data
+```{r}
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_chla)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_chla), color = "darkblue") +
@@ -220,7 +252,22 @@ refgrid_all <- ref_grid(chlamod, cov.keep = "lake",
 
 model_df <- as.data.frame(summary(refgrid_all, infer = c(T,T)))
 head(model_df)
+```
 
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+#Heat Maps
+```{r}
 
 ggplot(model_df,
        aes(x = as.factor(buffalo_kg_ha), y = as.factor(carp_kg_ha), fill = prediction)) +
@@ -240,9 +287,10 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in chla")
+```
 
 #Looking at Change in Chlorophyta (243-346)
-
+```{r}
 chloromod <- lm(delta_chloro ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(chloromod)
 Anova(chloromod, type = 3)
@@ -269,14 +317,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in Chlorophyta vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+chloro.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Chlorophyta vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in Chlorophyta")
-  
+chloro.carpharvest 
 
 refgrid_buf <- ref_grid(chloromod, 
                          at = list(buffalo_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
@@ -288,19 +336,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in Chlorophyta") +
   ggtitle("Estimated change in Chlorophyta vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+chloro.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Chlorophyta vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in Chlorophyta")
-
+chloro.buffharvest
+```
 
 
 # Plots
+# Plot the data
+```{r}
 
-  # Plot the data
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_chloro)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_chloro), color = "darkblue") +
@@ -317,8 +367,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_chloro)) +
   labs(title = "Harvest vs. Change in Chlorophyta (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in Chlorophyta")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(chloromod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -345,9 +410,11 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in Chlorophyta")
-       
+```
+
 #Looking at Change in Cyanophyta (348-452)
 
+```{r}
 cyanomod <- lm(delta_cyano ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(cyanomod)
 Anova(cyanomod, type = 3)
@@ -374,14 +441,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in Cyanophyta vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+cyano.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Cyanophyta vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in Cyanophyta")
-  
+cyano.carpharvest
 
 refgrid_buf <- ref_grid(cyanomod, 
                          at = list(buffalo_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
@@ -393,19 +460,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in Cyanophyta") +
   ggtitle("Estimated change in Cyanophyta vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+cyano.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Cyanophyta vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in Cyanophyta")
-
+cyano.buffharvest
+```
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_cyano)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_cyano), color = "darkblue") +
@@ -423,8 +492,22 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_cyano)) +
   labs(title = "Harvest vs. Change in Cyanophyta (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in Cyanophyta")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+```{r}
 refgrid_all <- ref_grid(cyanomod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -451,9 +534,11 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in Cyanophyta")
+```
 
 #Looking at change in Secchi Depth (454-559)
 
+```{r}
 sdmod <- lm(delta_sd ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(sdmod)
 Anova(sdmod, type = 3)
@@ -480,13 +565,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in SD vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+sd.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in SD vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in SD")
+sd.carpharvest
   
 
 refgrid_buf <- ref_grid(sdmod, 
@@ -499,19 +585,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in SD") +
   ggtitle("Estimated change in SD vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+sd.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in SD vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in SD")
-
-
+sd.buffharvest
+```
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
+
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_sd)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_sd), color = "darkblue") +
@@ -528,8 +616,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_sd)) +
   labs(title = "Harvest vs. Change in SD (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in SD")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(sdmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -558,8 +661,10 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in SD")
-       
+```
+
 #Looking at Changes in Total Nitrogen (561-667)
+```{r}
 
 tnmod <- lm(delta_tn ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tnmod)
@@ -587,14 +692,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in TN vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+tn.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TN vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in TN")
-  
+tn.carpharvest
 
 refgrid_buf <- ref_grid(tnmod, 
                          at = list(buffalo_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
@@ -606,19 +711,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in TN") +
   ggtitle("Estimated change in TN vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+tn.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TN vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in TN")
-
+tn.buffharvest
+```
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tn)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_tn), color = "darkblue") +
@@ -635,8 +742,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tn)) +
   labs(title = "Harvest vs. Change in TN (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in TN")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(tnmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -666,9 +788,11 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in TN")
+```
 
 #Looking at Change in Total Phosphorous (669-773)
 
+```{r}
 tpmod <- lm(delta_tp ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tpmod)
 Anova(tpmod, type = 3)
@@ -695,13 +819,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in TP vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+tp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TP vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in TP")
+tp.carpharvest
   
 
 refgrid_buf <- ref_grid(tpmod, 
@@ -714,19 +839,22 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in TP") +
   ggtitle("Estimated change in TP vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+tp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TP vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in TP")
-
+tp.buffharvest
+```
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
+
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tp)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_tp), color = "darkblue") +
@@ -743,8 +871,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tp)) +
   labs(title = "Harvest vs. Change in TP (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in TP")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(tpmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -772,8 +915,11 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in TP")
-       
+```
+
 #Looking at Change in Total Suspended Solids (775-878)
+
+```{r}
 
 tssmod <- lm(delta_tss ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tssmod)
@@ -801,13 +947,15 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in TSS vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+tss.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TSS vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in TSS")
+tss.carpharvest
+
   
 
 refgrid_buf <- ref_grid(tssmod, 
@@ -820,19 +968,22 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in TSS") +
   ggtitle("Estimated change in TSS vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+tss.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in TSS vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in TSS")
+tss.buffharvest
+```
 
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tss)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_tss), color = "darkblue") +
@@ -849,8 +1000,22 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_tss)) +
   labs(title = "Harvest vs. Change in TSS (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in TSS")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+```{r}
 refgrid_all <- ref_grid(tssmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -877,8 +1042,10 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in TSS")
+```
 
 #Looking at Change in Total Phytoplankton (880-985)
+```{r}
 
 tppmod <- lm(delta_total_phyto ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tppmod)
@@ -906,14 +1073,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in Total Phytoplankton vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+tpp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Total Phytoplankton vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in Total Phytoplankton")
-  
+tpp.carpharvest
 
 refgrid_buf <- ref_grid(tppmod, 
                          at = list(buffalo_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
@@ -925,19 +1092,22 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in Total Phytoplankton") +
   ggtitle("Estimated change in Total Phytoplankton vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+tpp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Total Phytoplankton vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in Total Phytoplankton")
-
+tpp.buffharvest
+```
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
+
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_total_phyto)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_total_phyto), color = "darkblue") +
@@ -954,8 +1124,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_total_phyto)) +
   labs(title = "Harvest vs. Change in Total Phytoplankton (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in Total Phytoplankton")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(tppmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -984,8 +1169,11 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in Total Phytoplankton")
-       
+```
+
 #Looking at Change in Total Zooplankton (987-1090)
+
+```{r}
 
 tzpmod <- lm(delta_total_zoo ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tzpmod)
@@ -1013,14 +1201,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in Total Zooplankton vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+tzp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Total Zooplankton vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in Total Zooplankton")
-  
+tzp.carpharvest
 
 refgrid_buf <- ref_grid(tzpmod, 
                          at = list(buffalo_kg_ha = c(1, 7, 20, 35, 50, 100, 150)))
@@ -1032,19 +1220,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in Total Zooplankton") +
   ggtitle("Estimated change in Total Zooplankton vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+tzp.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Total Zooplankton vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in Total Zooplankton")
-
+tzp.buffharvest
+```
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_total_zoo)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_total_zoo), color = "darkblue") +
@@ -1061,8 +1251,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_total_zoo)) +
   labs(title = "Harvest vs. Change in Total Zooplankton (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in Total Zooplankton")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+ 
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(tzpmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -1089,9 +1294,11 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in Total Zooplankton")
+```
 
 #Looking at Change in Turbidity (1092-1195)
 
+```{r}
 turbmod <- lm(delta_turbid ~ lake + year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(turbmod)
 Anova(turbmod, type = 3)
@@ -1118,13 +1325,14 @@ ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) +
   ggtitle("Estimated change in Turbidity vs. carp harvest")
 
 
-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
+turb.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Turbidity vs. carp harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "carp harvest (kg/ha)",
        y = "change in Turbidity")
+turb.carpharvest
   
 
 refgrid_buf <- ref_grid(turbmod, 
@@ -1137,19 +1345,21 @@ ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + g
   xlab("buffalo harvest (kg/ha)") + ylab("change in Turbidity") +
   ggtitle("Estimated change in Turbidity vs. buffalo harvest")
 
-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
+turb.buffharvest <-ggplot(data = buff_df, aes(x = buffalo_kg_ha, y = prediction, color = lake)) + 
   geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL, fill = lake),alpha=0.2) +
   geom_line() +
   labs(title = "Estimated change in Turbidity vs. buffalo harvest",
        subtitle = "With 95% CIs.  Note all CIs overlap each other and overlap 0.", 
        x = "buffalo harvest (kg/ha)",
        y = "change in Turbidity")
-
+turb.buffhavest
+```
 
 
 # Plots
+# Plot the data
 
-  # Plot the data
+```{r}
 ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_turbid)) +
   geom_line(color = "darkgreen") +
   geom_line(aes(x = carp_kg_ha, y = delta_turbid), color = "darkblue") +
@@ -1166,8 +1376,23 @@ ggplot(data = alldat, aes(x = buffalo_kg_ha, y = delta_turbid)) +
   labs(title = "Harvest vs. Change in Turbidity (data values averaged over all years)", 
        subtitle = "green = buffalo, blue = carp",
        x = "harvest (kg/ha)", y = "change in Turbidity")
+```
 
-  # Plot the model estimates
+#Interaction plots
+
+```{r}
+emmip(refgrid_all, carp_kg_ha ~ buffalo_kg_ha, CIs = T) +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Interaction plot of buffalo and carp harvest",
+       subtitle = "With 95% CI's.",
+       x = "buffalo harvest (kg/ha)",
+       y = "estimated change in chla",
+       color = "carp harvest (kg/ha)")
+```
+
+# Plot the model estimates
+
+```{r}
 refgrid_all <- ref_grid(turbmod, cov.keep = "lake",
                         at = list(buffalo_kg_ha = seq(0,150, by = 25), 
                                   carp_kg_ha = seq(0,150, by = 25)))
@@ -1194,9 +1419,18 @@ ggplot(model_df,
        x = "buffalo harvest (kg/ha)",
        y = "carp harvest (kg/ha)",
        fill = "Change in Turbidity")
+```   
        
-       
+#Combined Figures For Average Change of Value for Buffalo and Carp Density
+#Starting with Nutrients and TSI
+```{r}
+#Nutrients + TSI
 
-       
-       
+grid.arrange(tsi.carpharvest, tsi.buffharvest, chla.carpharvest, chla.buffharvest, tn.carpharvest, tn.buffharvest, tp.carpharvest, tp.buffharvest, ncol=2)
+
+#Biomass
+grid.arrange(tpp.carpharvest, tpp.buffharvest, tzp.carpharvest, tzp.buffharvest, chloro.carpharvest, chloro.buffharvest, cyano.carpharvest, cyano.buffharvest, ncol=2)
+
+#Physical
+grid.arrange(sd.carpharvest, sd.buffharvest, tss.carpharvest, tss.buffharvest, turb.carpharvest, turb.buffharvest, ncol=2)
        
