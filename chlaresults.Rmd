@@ -1,9 +1,11 @@
 install.packages("ggResidpanel")
 install.packages("emmeans")
+install.packages("ggpubr")
 library(ggplot2)
 library(ggResidpanel)
 library(car)
 library(emmeans)
+library(ggpubr)
 
 alldat <- read.csv("YearChange_MetricA.csv", header = T)
 names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha", 

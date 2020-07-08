@@ -29,11 +29,12 @@ alldat$year_cent <- alldat$year - min(alldat$year)
 #Looking At Change in TSI
 
 ```{r}
-ggplot(data = alldat, aes(x = year, y = delta_tsi, )) + geom_line() +
+ot.tsi <-ggplot(data = alldat, aes(x = year, y = delta_tsi, )) + geom_line() +
   geom_hline(yintercept = 0, linetype = "dotted") +
-  labs(title = "Change in TSI over time (data values)",
+  labs(title = "Change in TSI over time",
        x = "year",
-       y = "change in TSI")
+       y = "TSI")
+ot.tsi
 
 summary(alldat$carp_kg_ha)
 summary(alldat$buffalo_kg_ha)
@@ -79,7 +80,7 @@ tsi.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in TSI")
+       y = "TSI")
 tsi.carpharvest
   
 
@@ -175,6 +176,14 @@ ggplot(model_df,
 
 #Looking at Change in Chlorophyll a (137-241)     
 ```{r}
+ot.chla <-ggplot(data = alldat, aes(x = year, y = delta_chla, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in chla over time (ug/L)",
+       x = "year",
+       y = "Chlorphyll a (ug/L)")
+ot.chla
+
+
 chlamod <- lm(delta_chla ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(chlamod)
 Anova(chlamod, type = 3)
@@ -207,7 +216,7 @@ chla.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in chl a")
+       y = "chl a (ug/L)")
 chla.carpharvest
   
 
@@ -302,6 +311,14 @@ ggplot(model_df,
 
 #Looking at Change in Chlorophyta (243-346)
 ```{r}
+ot.chloro <-ggplot(data = alldat, aes(x = year, y = delta_chloro, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Chlorophyta over time",
+       x = "year",
+       y = "Chlorophyta (ug/L)")
+ot.chloro
+
+
 chloromod <- lm(delta_chloro ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(chloromod)
 Anova(chloromod, type = 3)
@@ -334,7 +351,7 @@ chloro.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction))
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in Chlorophyta")
+       y = "Chlorophyta (ug/L)")
 chloro.carpharvest 
 
 refgrid_buf <- ref_grid(chloromod, 
@@ -427,6 +444,15 @@ ggplot(model_df,
 #Looking at Change in Cyanophyta (348-452)
 
 ```{r}
+ot.cyano <-ggplot(data = alldat, aes(x = year, y = delta_cyano, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Cyanophyta over time",
+       x = "year",
+       y = "Cyanophyta (ug/L)")
+ot.cyano
+
+
+
 cyanomod <- lm(delta_cyano ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(cyanomod)
 Anova(cyanomod, type = 3)
@@ -459,7 +485,7 @@ cyano.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) 
   labs(title = "",
        subtitle = "", 
        x = "carp harvest (kg/ha)",
-       y = "change in Cyanophyta")
+       y = "Cyanophyta (ug/L)")
 cyano.carpharvest
 
 refgrid_buf <- ref_grid(cyanomod, 
@@ -552,6 +578,14 @@ ggplot(model_df,
 #Looking at change in Secchi Depth (454-559)
 
 ```{r}
+ot.sd <-ggplot(data = alldat, aes(x = year, y = delta_sd, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Secchi Depth over time",
+       x = "year",
+       y = "Secchi Depth (m)")
+ot.sd
+
+
 sdmod <- lm(delta_sd ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(sdmod)
 Anova(sdmod, type = 3)
@@ -584,7 +618,7 @@ sd.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in SD")
+       y = "SD (m)")
 sd.carpharvest
   
 
@@ -679,6 +713,15 @@ ggplot(model_df,
 
 #Looking at Changes in Total Nitrogen (561-667)
 ```{r}
+ot.tn <-ggplot(data = alldat, aes(x = year, y = delta_tn, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Total Nitrogen over time",
+       x = "year",
+       y = "Total Nitrogen (mg/L)")
+ot.tn
+
+
+
 
 tnmod <- lm(delta_tn ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tnmod)
@@ -712,7 +755,7 @@ tn.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in TN")
+       y = "TN (mg/L)")
 tn.carpharvest
 
 refgrid_buf <- ref_grid(tnmod, 
@@ -808,6 +851,15 @@ ggplot(model_df,
 #Looking at Change in Total Phosphorous (669-773)
 
 ```{r}
+ot.tp <-ggplot(data = alldat, aes(x = year, y = delta_tp, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Total Phosphorous over time",
+       x = "year",
+       y = "Total Phosphorous (ug/L)")
+ot.tp
+
+
+
 tpmod <- lm(delta_tp ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tpmod)
 Anova(tpmod, type = 3)
@@ -840,7 +892,7 @@ tp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "carp harvest (kg/ha)",
-       y = "change in TP")
+       y = "TP (ug/L)")
 tp.carpharvest
   
 
@@ -937,6 +989,15 @@ ggplot(model_df,
 #Looking at Change in Total Suspended Solids (775-878)
 
 ```{r}
+ot.tss <-ggplot(data = alldat, aes(x = year, y = delta_tss, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Total Suspended Solids over time",
+       x = "year",
+       y = "Total Suspended Solids (mg/L)")
+ot.tss
+
+
+
 
 tssmod <- lm(delta_tss ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tssmod)
@@ -970,7 +1031,7 @@ tss.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in TSS")
+       y = "TSS (mg/L)")
 tss.carpharvest
 
   
@@ -1064,6 +1125,13 @@ ggplot(model_df,
 
 #Looking at Change in Total Phytoplankton (880-985)
 ```{r}
+ot.tpp <-ggplot(data = alldat, aes(x = year, y = delta_total_phyto, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Total Phytoplankton Biomass over time",
+       x = "year",
+       y = "Total Phytoplankton Biomass (ug/L)")
+ot.tpp
+
 
 tppmod <- lm(delta_total_phyto ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tppmod)
@@ -1097,7 +1165,7 @@ tpp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in Total Phytoplankton")
+       y = "Total Phytoplankton (ug/L)")
 tpp.carpharvest
 
 refgrid_buf <- ref_grid(tppmod, 
@@ -1193,6 +1261,14 @@ ggplot(model_df,
 #Looking at Change in Total Zooplankton (987-1090)
 
 ```{r}
+ot.tzp <-ggplot(data = alldat, aes(x = year, y = delta_total_zoo, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Total Zooplankton Biomass over time",
+       x = "year",
+       y = "Total Zooplankton Biomass (ug/L)")
+ot.tzp
+
+
 
 tzpmod <- lm(delta_total_zoo ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(tzpmod)
@@ -1226,7 +1302,7 @@ tzp.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "",
-       y = "change in Total Zooplankton")
+       y = "Total Zooplankton (ug/L)")
 tzp.carpharvest
 
 refgrid_buf <- ref_grid(tzpmod, 
@@ -1319,6 +1395,13 @@ ggplot(model_df,
 #Looking at Change in Turbidity (1092-1195)
 
 ```{r}
+ot.turb <-ggplot(data = alldat, aes(x = year, y = delta_turbid, )) + geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  labs(title = "Change in Turbidity over time",
+       x = "year",
+       y = "Turbidity (NTU)")
+ot.turb
+
 turbmod <- lm(delta_turbid ~ year_cent + buffalo_kg_ha * carp_kg_ha, data = alldat)
 resid_panel(turbmod)
 Anova(turbmod, type = 3)
@@ -1351,7 +1434,7 @@ turb.carpharvest <-ggplot(data = carp_df, aes(x = carp_kg_ha, y = prediction)) +
   labs(title = "",
        subtitle = "", 
        x = "carp harvest (kg/ha)",
-       y = "change in Turbidity")
+       y = "Turbidity (NTU)")
 turb.carpharvest
   
 
@@ -1469,8 +1552,14 @@ grid.arrange(sd.carpharvest + theme(legend.position = "none"), sd.buffharvest + 
 
 ```{r}
 cplot <-grid.arrange(tsi.c, chla.c, tn.c, tp.c, tpp.c, tzp.c, chloro.c, cyano.c, sd.c, tss.c, turb.c, ncol =2)
-annotate_figure(cplot, top = text_grob("Change in Varibable vs Harvest", color = "black", face = "bold"), bottom = text_grob("Harvest (Kg/HA)"))
+annotate_figure(cplot, top = text_grob("Change in Variable vs Harvest", color = "black", face = "bold"), bottom = text_grob("Harvest (Kg/HA)"))
 cplot
+```
+
+```{r}
+overtime <-grid.arrange(ot.tsi, ot.chla, ot.tn, ot.tp, ot.tpp, ot.tzp, ot.chloro, ot.cyano, ot.sd, ot.tss, ot.turb, ncol=2)
+annotate_figure(ovetime, top = text_grob("Change in Response Variable over Time", color = "black", face = "bold"))
+overtime
 ```
 
 #Combining Interaction Plots for Each Variable
