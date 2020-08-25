@@ -18,12 +18,17 @@ names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha",
                    "delta_tss", "delta_tn", "delta_tp", "delta_sd", "delta_do", 
                    "delta_turbid", "delta_total_phyto", "delta_total_zoo",
                    "delta_chloro", "delta_cyano")
-alldat <- alldat[complete.cases(alldat),]
 alldat$year_fac <- as.factor(alldat$year)
 alldat$year_cent <- alldat$year - min(alldat$year)
 ```
 
-#Residuals
+#Removing Outliers
+```{r,include=FALSE}
+alldat$delta_total_zoo[alldat$delta_total_zoo > 1000] <- NA
+alldat$delta_total_zoo[alldat$delta_total_zoo < -1000] <- NA
+```
+
+#Summary
 ```{r,include=FALSE}
 ggplot(data = alldat, aes(x = year, y = delta_total_zoo, color = lake)) + geom_line() +
   geom_hline(yintercept = 0, linetype = "dotted") +

@@ -1,3 +1,4 @@
+```{r,include=FALSE}
 install.packages("ggResidpanel")
 install.packages("emmeans")
 install.packages("ggpubr")
@@ -6,6 +7,7 @@ library(ggResidpanel)
 library(car)
 library(emmeans)
 library(ggpubr)
+```
 
 ```{r,include=FALSE}
 # This chunk clears your environment, if you're like me and it gets messy over there.
@@ -20,12 +22,17 @@ names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha",
                    "delta_tss", "delta_tn", "delta_tp", "delta_sd", "delta_do", 
                    "detlat_turbid", "delta_total_phyto", "delta_total_zoo",
                    "delta_chloro", "delta_cyano")
-alldat <- alldat[complete.cases(alldat),]
 alldat$year_fac <- as.factor(alldat$year)
 alldat$year_cent <- alldat$year - min(alldat$year)
 ```
 
-#Residuals
+#Removing Outliers (Optional)
+```{r,include=False}
+alldat$delta_chla[alldat$delta_chla < -200] <- NA
+alldat$delta_chla[alldat$delta_chla > 300] <- NA
+```
+
+#Summary
 ```{r,include=FALSE}
 ggplot(data = alldat, aes(x = year, y = delta_chla, color = lake)) + geom_line() +
   geom_hline(yintercept = 0, linetype = "dotted") +
@@ -52,6 +59,10 @@ summary(mod1)
 ```{r,include=FALSE}
   # Look just at lakes, averaging over year and fish harvest
 emm_lake <- emmeans(mod1, specs = "lake")
+
+#Look at year_cent instead of lake
+##emm_lake <- emmeans(mod1, specs = "year_cent")
+
 emm_lake #These are the estimated delta-tsi for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest

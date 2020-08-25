@@ -1,0 +1,62 @@
+
+
+```{r,include=FALSE}
+# This chunk clears your environment
+rm(list=ls())
+```
+
+```{r, include = F}
+# This function checks and pre-loads packages for use
+packages<-function(x, repos="http://cran.r-project.org", ...){
+  x<-as.character(match.call()[[2]])
+      if (!require(x,character.only=TRUE)){
+          install.packages(pkgs=x, repos=repos, ...)
+        require(x,character.only=TRUE)
+}
+}
+# install and attach packages
+packages(knitr)
+packages(ggplot2)
+packages(gridExtra)
+packages(reshape2)
+packages(tidyr)
+packages(rcompanion)
+packages(scales)
+packages(GGally)
+
+# set figure margins for knitting
+knitr::opts_chunk$set(fig.width=8, fig.height=12)
+
+```
+
+#Load in Dataset
+```{r,include=FALSE}
+alldat <- read.csv("Dataset_1.csv", header = T)
+names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha", 
+                   "prop_carp", "prop_buff", "tsi", "tsi_chla", "chla",
+                   "tss", "tn", "tp", "sd", "do", 
+                   "turbid", "total_phyto", "total_zoo",
+                   "chloro", "cyano")
+alldat$year_fac <- as.factor(alldat$year)
+alldat$year_cent <- alldat$year - min(alldat$year)
+```
+
+#Pairwise Plots
+```{r,include = F}
+#TSI & Nutrients
+ggpairs(alldat, columns = c("tsi_chla", "chla", "tn", "tp"), title = "Pairwise Plot for TSI & Nutrients", columnLabels = c("TSI Chlorophyll a", "Chlorophyll a", "Total Nitrogen", "Total Phosphorous"))
+
+#Physical Variables
+ggpairs(alldat, columns = c("tss", "sd", "turbid"), title = "Pairwise Plot for Physical Variables", columnLabels = c("Total Suspended Solids", "Secchi Depth", "Turbidity"))
+
+#Biological Variables
+ggpairs(alldat, columns = c("total_phyto", "total_zoo", "chloro", "cyano"), title = "Pairwise Plot for Biological Variables", columnLabels = c("Total Phytoplankton Biomass", "Total Zooplankton Biomass", "Chlorophyta", "Cyanophyta"))
+
+#Plots above only look at what listed in them, I would like to separate them but do not know how, below is a plot with all of them, its messy but until I figure it out this is what we will have to look at
+
+#All Variables
+ggpairs(alldat, columns = c("tsi_chla", "chla", "tss", "tn", "tp", "sd", "turbid", "total_phyto", "total_zoo", "chloro", "cyano"), title = "Pairwise Plot for All Variables")
+
+
+```
+

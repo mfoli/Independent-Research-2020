@@ -18,12 +18,17 @@ names(alldat) <- c("lake", "year", "carp_kg_ha", "buffalo_kg_ha", "total_kg_ha",
                    "delta_tss", "delta_tn", "delta_tp", "delta_sd", "delta_do", 
                    "delta_turbid", "delta_total_phyto", "delta_total_zoo",
                    "delta_chloro", "delta_cyano")
-alldat <- alldat[complete.cases(alldat),]
 alldat$year_fac <- as.factor(alldat$year)
 alldat$year_cent <- alldat$year - min(alldat$year)
 ```
 
-#Residuals
+#Removing Outliers (Optional)
+```{r,include=FALSE}
+alldat$delta_chloro[alldat$delta_chloro < -5] <- NA
+
+```
+
+#Summary
 ```{r,include=FALSE}
 ggplot(data = alldat, aes(x = year, y = delta_chloro, color = lake)) + geom_line() +
   geom_hline(yintercept = 0, linetype = "dotted") +
@@ -50,6 +55,10 @@ summary(mod1)
 ```{r,include=FALSE}
   # Look just at lakes, averaging over year and fish harvest
 emm_lake <- emmeans(mod1, specs = "lake")
+
+#Look at year_cent instead of lake
+##emm_lake <- emmeans(mod1, specs = "year_cent")
+
 emm_lake #These are the estimated delta-Chlorophyta for each lake, at the mean values of buffalo and carp harvest
 
   # Look just at sp harvest per lake, averaging over year and other sp harvest
