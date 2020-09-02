@@ -1,0 +1,35 @@
+```{r, include=F}
+#Attach Data
+dataNMDS <- read.csv("NMDS_Dataset.csv", h = T)
+attach(dataNMDS)
+str(dataNMDS)
+
+#Install Packages
+install.packages("vegan")
+library("vegan")
+
+```
+
+#Subsetting Dataset for ordination and descriptive/environmental data
+```{r, include = F}
+#data for ordination
+data_1 <- dataNMDS[,3:13]
+
+#data for description
+data_2 <- dataNMDS[,1:2]
+```
+
+#Running NMDS 
+```{r, include = F}
+#In two dimensions
+NMDS1 <- metaMDS(data_1, auto=FALSE, k = 2)
+
+```
+
+#Data Visulation
+```{r, include = F}
+
+co = c("Red","Blue", "Green", "Orange", "Black")
+plot(NMDS1$points, col=co[data_2$Lake], cex=1,2, main="Water Quality Composition", xlab = "axis 1", ylab = "axis 2")
+
+ ```
