@@ -22,14 +22,14 @@ data_2 <- dataNMDS[,1:2]
 #Running NMDS 
 ```{r, include = F}
 #In two dimensions
-NMDS1 <- metaMDS(data_1, auto=FALSE, k = 2)
+NMDS <- metaMDS(data_1, distance = "euclidean", k = 2)
 
 ```
 
 #Data Visulation
 ```{r, include = F}
-
 co = c("Red","Blue", "Green", "Orange", "Black")
-plot(NMDS1$points, col=co[data_2$Lake], cex=1,2, main="Water Quality Composition", xlab = "axis 1", ylab = "axis 2")
-
- ```
+shape = c(18,16,14,12,10)
+plot(NMDS$points, col=co[data_2$Lake], pch = shape[data_2$Lake], cex=1,2, main="Water Quality Composition", xlab = "axis 1", ylab = "axis 2")
+envfit(NMDS1, data_1)
+```
