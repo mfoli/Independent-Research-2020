@@ -1,0 +1,72 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r, include=F}
+#Attach Data
+pca <- read.csv("pca.csv", h = T)
+attach(pca)
+str(pca)
+
+pcaNA <- read.csv("pca censored.csv", h =T)
+attach(pca)
+str(pca)
+
+#Install Packages
+install.packages("vegan")
+install.packages("cluster")
+install.packages("ggfortify")
+library("vegan")
+library("cluster")
+library("ggfortify")
+
+```
+
+#Subsetting Dataset for ordination and descriptive/environmental data
+```{r, include = F}
+#data for ordination
+data_1 <- pca[,4:13]
+
+#data for description
+data_2 <- pca[,1:3]
+names(data_2) <- c("Lake", "Year", "Treatment")
+```
+
+#Running PCA
+```{r, include = F}
+#super helpful for plotting
+#https://cran.r-project.org/web/packages/ggfortify/vignettes/plot_pca.html
+
+mypca <-prcomp(data_1, scale = F)
+autoplot(mypca)
+autoplot(mypca, data = pca, colour = 'Treatment', loadings = TRUE, loadings.colour = 'black', loadings.label = TRUE, loadings.label.colour = 'black', loadings.label.size = 3)
+
+envfit(mypca, data_1, permutations = 999)
+
+```
+
+#Running PCA but without NA's present as Zeros in the dataset (20 Lines Removed)
+```{r, include = F}
+
+#data for ordination
+data_3 <- pcaNA[,4:13]
+
+#data for description
+data_4 <- pcaNA[,1:3]
+names(data_4) <- c("Lake", "Year", "Treatment")
+
+mypca2 <-prcomp(data_3, scale = F)
+autoplot(mypca2)
+autoplot(mypca2, data = pcaNA, colour = 'Treatment', loadings = TRUE, loadings.colour = 'black', loadings.label = TRUE, loadings.label.colour = 'black', loadings.label.size = 3)
+
+envfit(mypca2, data_3, permutations = 999)
+
+```
+
+
+
+
+
+
+
